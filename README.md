@@ -21,5 +21,5 @@
 virtualenv -p python env
 source env/bin/activate
 pip install --editable .
-python base_git.py hook -r ``http://**/api/v4`` -t ``your-private-token`` -h ``somehook``
+python base_git.py hook -r http://**/api/v4 -t your-private-token -h somehook
 ```
