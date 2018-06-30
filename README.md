@@ -15,11 +15,31 @@
 
 # Installation
 
-### Add hook
+### Install & Start with Docker
 
 ```shell
-virtualenv -p python env
-source env/bin/activate
-pip install --editable .
-python base_git.py hook -r http://**/api/v4 -t your-private-token -h somehook
+git clone https://github.com/NDHWAlliance/gitlab-analytics.git
+cd gitlab-analytics
+docker-compose up mysql grafana ga
 ```
+ 
+### Configuration
+Configure your gitlab's url and private_token.
+
+```shell
+cd server && cp config.ini.tpl config.ini
+```
+
+```ini
+[gitlab]
+url = http://your.github.com 
+private_token = YourPrivateToken
+```
+  
+# Reference
+* [Initializing Grafana with preconfigured dashboards](https://ops.tips/blog/initialize-grafana-with-preconfigured-dashboards/)
+* [Dockerize Simple Flask App](http://containertutorials.com/docker-compose/flask-simple-app.html)
+* https://hub.docker.com/_/mariadb/
+* https://hub.docker.com/r/grafana/grafana/
+* [Using MySQL in Grafana - Configure the Datasource with Provisioning](http://docs.grafana.org/features/datasources/mysql/#configure-the-datasource-with-provisioning)
+* [Provisioning Grafana](http://docs.grafana.org/administration/provisioning/)
