@@ -15,7 +15,7 @@
 
 # Installation
 
-### Install & Start with Docker
+### Intialize with Docker
 
 ```shell
 git clone https://github.com/NDHWAlliance/gitlab-analytics.git
