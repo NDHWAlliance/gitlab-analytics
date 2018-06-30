@@ -1,0 +1,43 @@
+version: '3'
+
+services:
+  ga:
+    build: './gitlab-analytics'
+    container_name: ga
+    environment:
+      - PORT=8080
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=ga
+      - MYSQL_PASSWORD=4t9wegcvbYSd
+      - MYSQL_DATABASE=gitlab_analytics
+    depends_on:
+      - mysql
+    ports:
+      - "8080:8080"
+
+  mysql:
+    image: mariadb:5.5.60
+    container_name: mysql
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./data/db:/var/lib/mysql
+      - ./mysql:/docker-entrypoint-initdb.d
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_DATABASE=gitlab_analytics
+      - MYSQL_USER=ga
+      - MYSQL_PASSWORD=4t9wegcvbYSd
+
+  grafana:
+    image: grafana/grafana:5.1.4
+    container_name: grafana
+    volumes:
+      - ./grafana/:/etc/grafana/
+      - ./data/grafana:/var/lib/grafana
+    depends_on:
+      - mysql
+    ports:
+      - "3000:3000"
+

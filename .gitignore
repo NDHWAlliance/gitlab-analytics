@@ -1,5 +1,6 @@
 .idea
 *.pyc
-*env
+server/*env
 *.egg-info
 *.swp
+data
