@@ -1,17 +1,16 @@
-from flask import Flask
+from flask import Flask, request, jsonify
 import os
-import random
-import string
-import datetime
+import json
 from gitlab_analytics_models import *
+from webhook_handler import dispatch
 
 app = Flask(__name__)
 
 
-@app.route('/webhook/', methods=['POST'])
-def webhook():
-    # handle gitlab webhook here, save the event data into DB
-    return "Hello World!"
+@app.route('/web_hook/', methods=['POST'])
+def web_hook():
+    ret = dispatch(json.loads(request.get_data()))
+    return jsonify(ret)
 
 
 def init_mariadb():
@@ -30,7 +29,8 @@ def init_mariadb():
                                'password': str(mysql_password),
                                'charset': 'utf8', 'use_unicode': True}
 
+
 if __name__ == '__main__':
-    init_mariadb()
+    #init_mariadb()
     port = os.getenv("PORT")
     app.run(debug=True, host='0.0.0.0', port=port)

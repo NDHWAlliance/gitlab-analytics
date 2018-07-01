@@ -3,10 +3,24 @@
 """
     webhook_handler.py
 """
+from gitlab import GitlabGetError
 
 import gitlab_api
 import gitlab_analytics_models
-import json
+import sys
+
+
+def dispatch(event_data):
+    mod = sys.modules[__name__]
+    func = getattr(mod, event_data['object_kind'], None)
+
+    if func is not None:
+        try:
+            func(event_data)
+        except GitlabGetError as e:
+            return {"ret": e.response_code, "message": e.error_message, "data": event_data}
+
+    return {"ret": 0}
 
 
 def push(push_data):
