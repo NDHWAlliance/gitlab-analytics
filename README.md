@@ -43,3 +43,4 @@ private_token = YourPrivateToken
 * https://hub.docker.com/r/grafana/grafana/
 * [Using MySQL in Grafana - Configure the Datasource with Provisioning](http://docs.grafana.org/features/datasources/mysql/#configure-the-datasource-with-provisioning)
 * [Provisioning Grafana](http://docs.grafana.org/administration/provisioning/)
+* [Webhook for gitlab's events](http://developer.dpstorm.com/help/user/project/integrations/webhooks.md)
