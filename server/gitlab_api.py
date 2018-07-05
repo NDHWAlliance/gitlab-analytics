@@ -15,7 +15,7 @@ GL = gitlab.Gitlab(URL, private_token=PRIVATE_TOKEN)
 
 
 def get_datetime(origin_str):
-    return datetime.datetime.strptime(origin_str[0:19], "%Y-%m-%dT%H:%M:%S")
+    return datetime.datetime.strptime(origin_str[0:19], "%Y-%m-%d{}%H:%M:%S".format(origin_str[10:11]))
 
 
 def get_commit_detail(project_id, commit_id):
