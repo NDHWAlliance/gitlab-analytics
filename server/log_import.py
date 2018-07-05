@@ -40,7 +40,16 @@ def event_info(**options):
                 # ret = request.urlopen(req, bytes(json.dumps(data['data']), 'utf8')).read()
                 ret = dispatch(data['data'])
                 print("line:{}, ret:{}".format(line_num, ret))
+
+                # 模拟不同时间修改，wiki的创建与修改时间没法通过事件和api读取
                 time.sleep(1)
+            elif data['data']['object_kind'] == 'issue':
+                ret = dispatch(data['data'])
+                print("line:{}, ret:{}".format(line_num, ret))
+            elif data['data']['object_kind'] == 'commit':
+                ret = dispatch(data['data'])
+                print("line:{}, ret:{}".format(line_num, ret))
+
         except ValueError as e:
             print(e)
             print("line:{} message:{}".format(line_num, line))

@@ -112,4 +112,5 @@ class GitlabWikiComments(BaseModel):
 
 
 if __name__ == '__main__':
-    database.create_tables([GitlabWikiCreate, GitlabWikiUpdate])
+    database.drop_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate, GitlabWikiUpdate])
+    database.create_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate, GitlabWikiUpdate])
