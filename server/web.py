@@ -4,6 +4,7 @@ import json
 from gitlab_analytics_models import *
 from webhook_handler import dispatch
 from flask import render_template
+from flask import request
 
 app = Flask(__name__)
 
@@ -17,22 +18,64 @@ def root():
                            private_token=private_token)
 
 
-def intialization():
-    # setup charset
-    # create readonly user
-    # create tables
-    pass
+def setup_db_connection():
+    # all the env here are defined in docker-compose.yml
+    mysql_host = os.getenv("MYSQL_HOST")
+    mysql_port = os.getenv("MYSQL_PORT")
+    mysql_user = os.getenv("MYSQL_USER")
+    mysql_password = os.getenv("MYSQL_PASSWORD")
+    mysql_database = os.getenv("MYSQL_DATABASE")
+    app.logger.debug(
+        "setup db connection {}@{}:{}".format(mysql_user, mysql_host,
+                                              mysql_database))
+
+    database.database = mysql_database
+    database.connect_params = {'host': mysql_host, 'port': int(mysql_port),
+                               'user': mysql_user,
+                               'password': str(mysql_password),
+                               'charset': 'utf8', 'use_unicode': True}
+
+
+def initialize_db():
+    app.logger.info("initialize_db")
+    database.execute_sql(
+        'alter database gitlab_analytics default character set utf8 collate utf8_general_ci')
+    GitlabCommits.create_table()
+    GitlabIssues.create_table()
+    GitlabWikiComments.create_table()
+    GitlabWikiCreate.create_table()
+    GitlabWikiUpdate.create_table()
+    Settings.create_table()
 
 
 @app.route("/admin", methods=['GET', 'POST'])
-def admin(gitlab_url="", private_token=""):
-    # TODO
-    # if table not exists: do some intialization such as create tables
-    # save config values into tables
+def admin():
     # TODO when will webhooks be added to gitlab repos?
-    need_intialization = False
-    if need_intialization:
-        intialization()
+    setup_db_connection()
+    gitlab_url = ""
+    private_token = ""
+    if request.method == 'POST':
+        if not GitlabCommits.table_exists():
+            initialize_db()
+        gitlab_url = request.form['gitlab_url']
+        private_token = request.form['private_token']
+        s, exists = Settings.get_or_create(name="gitlab_url")
+        s.value = gitlab_url
+        s.save()
+        s, exists = Settings.get_or_create(name="private_token")
+        s.value = private_token
+        s.save()
+
+    else:
+        if Settings.table_exists():
+            s = Settings.get_or_none(name="gitlab_url")
+            if s is not None:
+                gitlab_url = s.value
+            s = Settings.get_or_none(name="private_token")
+            if s is not None:
+                private_token = s.value
+    app.logger.debug("gitlab_url: " + gitlab_url)
+    app.logger.debug("private_token: " + private_token)
     return render_template('admin.html', name="admin", gitlab_url=gitlab_url,
                            private_token=private_token)
 
@@ -41,23 +84,6 @@ def admin(gitlab_url="", private_token=""):
 def web_hook():
     ret = dispatch(json.loads(request.get_data()))
     return jsonify(ret)
-
-
-def init_mariadb():
-    # all the env here are defined in docker-compose.yml
-    mysql_host = os.getenv("MYSQL_HOST")
-    mysql_port = os.getenv("MYSQL_PORT")
-    mysql_user = os.getenv("MYSQL_USER")
-    mysql_password = os.getenv("MYSQL_PASSWORD")
-    mysql_database = os.getenv("MYSQL_DATABASE")
-    print("init_mariadb")
-    print(mysql_host)
-
-    database.database = mysql_database
-    database.connect_params = {'host': mysql_host, 'port': int(mysql_port),
-                               'user': mysql_user,
-                               'password': str(mysql_password),
-                               'charset': 'utf8', 'use_unicode': True}
 
 
 if __name__ == '__main__':

@@ -7,8 +7,11 @@ import sys
 
 from peewee import *
 
-database = MySQLDatabase('gitlab_analytics', **{'charset': 'utf8', 'use_unicode': True, 'host': '127.0.0.1', 'user': 'ga', 'password': '4t9wegcvbYSd'})
-database.execute_sql('alter database gitlab_analytics default character set utf8 collate utf8_general_ci')
+database = MySQLDatabase('gitlab_analytics',
+                         **{'charset': 'utf8', 'use_unicode': True,
+                            'host': '127.0.0.1', 'user': 'ga',
+                            'password': '4t9wegcvbYSd'})
+
 
 
 class BaseModel(Model):
@@ -111,6 +114,16 @@ class GitlabWikiComments(BaseModel):
         )
 
 
+class Settings(BaseModel):
+    name = CharField(primary_key=True)
+    value = CharField(null=True)
+
+    class Meta:
+        db_table = 'settings'
+
+
 if __name__ == '__main__':
-    database.drop_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate, GitlabWikiUpdate])
-    database.create_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate, GitlabWikiUpdate])
+    database.drop_tables(
+        [GitlabCommits, GitlabIssues, GitlabWikiCreate, GitlabWikiUpdate])
+    database.create_tables(
+        [GitlabCommits, GitlabIssues, GitlabWikiCreate, GitlabWikiUpdate])
