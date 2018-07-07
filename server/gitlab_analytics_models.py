@@ -94,23 +94,79 @@ class GitlabWikiUpdate(BaseModel):
         )
 
 
-class GitlabWikiComments(BaseModel):
+class GitlabMergeRequest(BaseModel):
     author_name = CharField(index=True)
+    merge_request_id = CharField()
+    created_at = DateTimeField(index=True)
+    ignore = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    title = CharField()
+    milestone_id = CharField(null=True)
+    project = IntegerField(column_name='project_id')
+    project_path = CharField()
+    assignee = CharField(index=True)
+
+    class Meta:
+        table_name = 'gitlab_merge_request'
+        indexes = (
+            (('merge_request_id', 'project'), True),
+        )
+
+
+class GitlabMRInitiatorComment(BaseModel):
+    author_name = CharField(index=True)
+    merge_request_id = CharField()
     comment_id = CharField()
     created_at = DateTimeField(index=True)
     ignore = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
     content_length = IntegerField()
-    title = CharField()
     project = IntegerField(column_name='project_id')
     project_path = CharField()
 
     class Meta:
-        table_name = 'gitlab_wiki_update'
+        table_name = 'gitlab_mr_initiator_comment'
         indexes = (
-            (('comment_id', 'project'), True),
+            (('merge_request_id', 'comment_id', 'project'), True),
+        )
+
+
+class GitlabMRAssigneeComment(BaseModel):
+    author_name = CharField(index=True)
+    merge_request_id = CharField()
+    comment_id = CharField()
+    created_at = DateTimeField(index=True)
+    ignore = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    content_length = IntegerField()
+    project = IntegerField(column_name='project_id')
+    project_path = CharField()
+
+    class Meta:
+        table_name = 'gitlab_mr_assignee_comment'
+        indexes = (
+            (('merge_request_id', 'comment_id', 'project'), True),
+        )
+
+
+class GitlabIssueComment(BaseModel):
+    author_name = CharField(index=True)
+    issue_id = CharField()
+    comment_id = CharField()
+    created_at = DateTimeField(index=True)
+    ignore = IntegerField(constraints=[SQL("DEFAULT 0")], null=True)
+    content_length = IntegerField()
+    project = IntegerField(column_name='project_id')
+    project_path = CharField()
+
+    class Meta:
+        table_name = 'gitlab_issue_comment'
+        indexes = (
+            (('issue_id', 'comment_id', 'project'), True),
         )
 
 
 if __name__ == '__main__':
-    database.drop_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate, GitlabWikiUpdate])
-    database.create_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate, GitlabWikiUpdate])
+    database.drop_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate,
+                          GitlabWikiUpdate, GitlabMergeRequest, GitlabMRInitiatorComment,
+                          GitlabMRAssigneeComment, GitlabIssueComment])
+    database.create_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate,
+                            GitlabWikiUpdate, GitlabMergeRequest, GitlabMRInitiatorComment,
+                            GitlabMRAssigneeComment, GitlabIssueComment])

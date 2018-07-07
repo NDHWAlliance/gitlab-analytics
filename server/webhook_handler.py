@@ -120,3 +120,69 @@ def wiki_page(wiki_data):
                                           ).on_conflict_replace().execute()
                 GitlabWikiCreate.update(content_length=len(wiki_data['object_attributes']['content'])).where(
                     GitlabWikiCreate.project == wiki_data['project']['id'], GitlabWikiCreate.wiki_id == wiki_data['object_attributes']['slug']).execute()
+
+
+def merge_request(merge_request_data):
+    # open的时候才统计
+    if merge_request_data['object_attributes']['action'] != 'open':
+        return
+
+    # 不指定assignee的merge_request不统计，不是规范的codereview
+    if not merge_request_data['object_attributes']['assignee_id']:
+        return
+
+    print('{} {}'.format(merge_request_data['user']['username'], merge_request_data['assignee']['username']))
+
+    GitlabMergeRequest.insert(project=merge_request_data['project']['id'],
+                              project_path=merge_request_data['project']['path_with_namespace'],
+                              author_name=merge_request_data['user']['username'],
+                              merge_request_id=merge_request_data['object_attributes']['id'],
+                              created_at=merge_request_data['object_attributes']['created_at'],
+                              ignore=0,
+                              title=merge_request_data['object_attributes']['title'],
+                              milestone_id=merge_request_data['object_attributes']['milestone_id'],
+                              assignee=merge_request_data['assignee']['username']
+                              ).on_conflict_replace().execute()
+    GitlabMRInitiatorComment.insert(project=merge_request_data['project']['id'],
+                                    project_path=merge_request_data['project']['path_with_namespace'],
+                                    author_name=merge_request_data['user']['username'],
+                                    merge_request_id=merge_request_data['object_attributes']['id'],
+                                    created_at=gitlab_api.get_datetime(merge_request_data['object_attributes']['created_at']),
+                                    ignore=0,
+                                    content_length=len(merge_request_data['object_attributes']['description'])
+                                    ).on_conflict_replace().execute()
+
+
+def note(comment_data):
+    if comment_data['object_attributes']['noteable_type'] == 'MergeRequest':
+        if comment_data['object_attributes']['author_id'] == comment_data['merge_request']['author_id']:
+            # 评论自己的request说明很好地配合codereview
+            GitlabMRInitiatorComment.insert(project=comment_data['project']['id'],
+                                            project_path=comment_data['project']['path_with_namespace'],
+                                            author_name=comment_data['user']['username'],
+                                            merge_request_id=comment_data['merge_request']['id'],
+                                            created_at=gitlab_api.get_datetime(comment_data['object_attributes']['created_at']),
+                                            ignore=0,
+                                            content_length=len(comment_data['object_attributes']['note'])
+                                            ).on_conflict_replace().execute()
+        else:
+            # 很好地进行对别人的codereview与参与讨论
+            GitlabMRAssigneeComment.insert(project=comment_data['project']['id'],
+                                           project_path=comment_data['project']['path_with_namespace'],
+                                           author_name=comment_data['user']['username'],
+                                           merge_request_id=comment_data['merge_request']['id'],
+                                           created_at=gitlab_api.get_datetime(comment_data['object_attributes']['created_at']),
+                                           ignore=0,
+                                           content_length=len(comment_data['object_attributes']['note'])
+                                           ).on_conflict_replace().execute()
+
+    elif comment_data['object_attributes']['noteable_type'] == 'Issue':
+        GitlabIssueComment.insert(project=comment_data['project']['id'],
+                                  project_path=comment_data['project']['path_with_namespace'],
+                                  author_name=comment_data['user']['username'],
+                                  issue_id=comment_data['issue']['id'],
+                                  created_at=gitlab_api.get_datetime(comment_data['object_attributes']['created_at']),
+                                  ignore=0,
+                                  content_length=len(comment_data['object_attributes']['note'])
+                                  ).on_conflict_replace().execute()
+

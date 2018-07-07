@@ -35,20 +35,26 @@ def event_info(**options):
 
         try:
             data = json.loads(line[0:-1].replace('\n', '\\n'))
-            if data['data']['object_kind'] == 'wiki_page':
-                # req = request.Request(req_url)
-                # ret = request.urlopen(req, bytes(json.dumps(data['data']), 'utf8')).read()
+            if data['data']['object_kind'] == 'merge_request':
                 ret = dispatch(data['data'])
                 print("line:{}, ret:{}".format(line_num, ret))
-
-                # 模拟不同时间修改，wiki的创建与修改时间没法通过事件和api读取
-                time.sleep(1)
-            elif data['data']['object_kind'] == 'issue':
+            elif data['data']['object_kind'] == 'note':
                 ret = dispatch(data['data'])
                 print("line:{}, ret:{}".format(line_num, ret))
-            elif data['data']['object_kind'] == 'commit':
-                ret = dispatch(data['data'])
-                print("line:{}, ret:{}".format(line_num, ret))
+            # elif data['data']['object_kind'] == 'wiki_page':
+            #     # req = request.Request(req_url)
+            #     # ret = request.urlopen(req, bytes(json.dumps(data['data']), 'utf8')).read()
+            #     ret = dispatch(data['data'])
+            #     print("line:{}, ret:{}".format(line_num, ret))
+            #
+            #     # 模拟不同时间修改，wiki的创建与修改时间没法通过事件和api读取
+            #     time.sleep(1)
+            # elif data['data']['object_kind'] == 'issue':
+            #     ret = dispatch(data['data'])
+            #     print("line:{}, ret:{}".format(line_num, ret))
+            # elif data['data']['object_kind'] == 'commit':
+            #     ret = dispatch(data['data'])
+            #     print("line:{}, ret:{}".format(line_num, ret))
 
         except ValueError as e:
             print(e)
