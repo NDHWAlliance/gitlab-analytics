@@ -1,0 +1,13 @@
+<!doctype html>
+<title>Hello from Flask</title>
+{% if name %}
+  <h1>Hello {{ name }}!</h1>
+{% else %}
+  <h1>Hello, World!</h1>
+{% endif %}
+
+<form action="/admin" method="post">
+    GitLab URL: <input type="text" name="gitlab_url" value="{{ gitlab_url }}" /><br>
+    Private Token: <input type="text" name="private_token" value ="{{ private_token }}"/><br>
+    <input type="submit" value="Save">
+</form>
