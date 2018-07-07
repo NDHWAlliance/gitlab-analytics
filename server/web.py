@@ -40,12 +40,10 @@ def initialize_db():
     app.logger.info("initialize_db")
     database.execute_sql(
         'alter database gitlab_analytics default character set utf8 collate utf8_general_ci')
-    GitlabCommits.create_table()
-    GitlabIssues.create_table()
-    GitlabWikiComments.create_table()
-    GitlabWikiCreate.create_table()
-    GitlabWikiUpdate.create_table()
-    Settings.create_table()
+    database.create_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate,
+                            GitlabWikiUpdate, GitlabIssueComment,
+                            GitlabMergeRequest, GitlabMRAssigneeComment,
+                            GitlabMRInitiatorComment, Settings])
 
 
 @app.route("/admin", methods=['GET', 'POST'])
