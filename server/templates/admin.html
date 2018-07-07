@@ -1,13 +1,43 @@
 <!doctype html>
-<title>Hello from Flask</title>
-{% if name %}
-  <h1>Hello {{ name }}!</h1>
-{% else %}
-  <h1>Hello, World!</h1>
-{% endif %}
+<html lang="zh-cmn-Hans">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-<form action="/admin" method="post">
-    GitLab URL: <input type="text" name="gitlab_url" value="{{ gitlab_url }}" /><br>
-    Private Token: <input type="text" name="private_token" value ="{{ private_token }}"/><br>
-    <input type="submit" value="Save">
-</form>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+
+    <title>GitLab Analytics Admin</title>
+  </head>
+  <body>
+    <div class="container">
+
+        <h1>Hello, {{ name }}!</h1>
+
+        <form action="/admin" method="post">
+          <div class="form-group">
+            <label for="exampleInputEmail1">GitLab Analytics External URL</label>
+            <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter GitLab Analytics External URL" name="external_url" value="{{ external_url }}">
+            <small id="emailHelp" class="form-text text-muted">从外面访问GitLab Analytics的网址</small>
+          </div>
+          <div class="form-group">
+            <label for="exampleInputPassword1">GitLab URL</label>
+            <input type="text" class="form-control" id="exampleInputPassword1" placeholder="GitLab URL" name="gitlab_url" value="{{ gitlab_url }}">
+          </div>
+          <div class="form-group">
+            <label for="exampleInputPassword12">GitLab Private Token</label>
+            <input type="text" class="form-control" id="exampleInputPassword12" placeholder="GitLab Private Token" name="private_token" value ="{{ private_token }}">
+          </div>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+    </div>
+
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://cdn.bootcss.com/jquery/3.3.1/jquery.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
+  </body>
+</html>

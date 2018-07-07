@@ -50,32 +50,25 @@ def initialize_db():
 def admin():
     # TODO when will webhooks be added to gitlab repos?
     setup_db_connection()
-    gitlab_url = ""
-    private_token = ""
+    config_names = ['external_url', 'gitlab_url', 'private_token']
     if request.method == 'POST':
-        if not GitlabCommits.table_exists():
+        if not Settings.table_exists():
             initialize_db()
-        gitlab_url = request.form['gitlab_url']
-        private_token = request.form['private_token']
-        s, exists = Settings.get_or_create(name="gitlab_url")
-        s.value = gitlab_url
-        s.save()
-        s, exists = Settings.get_or_create(name="private_token")
-        s.value = private_token
-        s.save()
+        for name in config_names:
+            value = request.form[name]
+            s, exists = Settings.get_or_create(name=name)
+            s.value = value
+            s.save()
 
-    else:
-        if Settings.table_exists():
-            s = Settings.get_or_none(name="gitlab_url")
-            if s is not None:
-                gitlab_url = s.value
-            s = Settings.get_or_none(name="private_token")
-            if s is not None:
-                private_token = s.value
-    app.logger.debug("gitlab_url: " + gitlab_url)
-    app.logger.debug("private_token: " + private_token)
-    return render_template('admin.html', name="admin", gitlab_url=gitlab_url,
-                           private_token=private_token)
+    configs = {}
+    if Settings.table_exists():
+        for name in config_names:
+            row = Settings.get_or_none(name=name)
+            if row is not None:
+                configs[name] = row.value
+    app.logger.debug("configs: ")
+    app.logger.debug(configs)
+    return render_template('admin.html', name="admin", **configs)
 
 
 @app.route('/web_hook/', methods=['POST'])
