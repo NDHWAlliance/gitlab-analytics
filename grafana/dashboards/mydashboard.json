@@ -22,12 +22,13 @@
       "datasource": "gitlab_analytics",
       "fontSize": "100%",
       "gridPos": {
-        "h": 9,
-        "w": 12,
+        "h": 7,
+        "w": 24,
         "x": 0,
         "y": 0
       },
       "id": 2,
+      "links": [],
       "pageSize": null,
       "scroll": true,
       "showHeader": true,
@@ -62,11 +63,173 @@
           "$$hashKey": "object:172",
           "alias": "",
           "format": "table",
-          "rawSql": "select  author_name, author_email, count(*) as \"提交次数\",\n    sum(line_additions) as \"增加行数\",\n    sum(line_deletions) as \"删除行数\",\n    sum(line_total) as \"总修改行数\"\nfrom gitlab_commits\nwhere `ignore` = 0\ngroup by author_name, author_email",
+          "rawSql": "select  author_name, author_email, count(*) as \"提交次数\",\n    sum(line_additions) as \"增加行数\",\n    sum(line_deletions) as \"删除行数\",\n    sum(line_total) as \"总修改行数\"\nfrom gitlab_commits\nwhere `ignore` = 0 and $__timeFilter(authored_date)\ngroup by author_name, author_email",
           "refId": "A"
         }
       ],
-      "title": "Panel Title",
+      "title": "commit统计",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "gitlab_analytics",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 7
+      },
+      "id": 4,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "$$hashKey": "object:423",
+          "alias": "",
+          "format": "table",
+          "rawSql": "SELECT author_name, count(*) as \"issue次数\"\nfrom gitlab_issues\nwhere $__timeFilter(created_at)\ngroup by author_name;",
+          "refId": "A"
+        }
+      ],
+      "title": "issue创建",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "gitlab_analytics",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 12,
+        "y": 7
+      },
+      "id": 6,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "$$hashKey": "object:528",
+          "alias": "",
+          "format": "table",
+          "rawSql": "SELECT author_name, sum(content_length) as \"评论字数\"\nfrom gitlab_issue_comment\nwhere $__timeFilter(created_at)\ngroup by author_name",
+          "refId": "A"
+        }
+      ],
+      "title": "issue评论",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "gitlab_analytics",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 8,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "$$hashKey": "object:753",
+          "alias": "",
+          "format": "table",
+          "rawSql": "SELECT author_name, count(*) as \"wiki修改次数\", sum(content_length) as \"字数\"\nfrom gitlab_wiki_update\nwhere $__timeFilter(created_at) and gitlab_wiki_update.content_length < 5000 \ngroup by author_name;",
+          "refId": "A"
+        }
+      ],
+      "title": "wiki修改次数",
       "transform": "table",
       "type": "table"
     }
@@ -78,7 +241,7 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-30d",
     "to": "now"
   },
   "timepicker": {
@@ -109,5 +272,5 @@
   "timezone": "",
   "title": "gitlab analytics example",
   "uid": "4z0gJEHik",
-  "version": 2
+  "version": 1
 }
