@@ -23,7 +23,8 @@ services:
       - "3306:3306"
     volumes:
       - ./data/db:/var/lib/mysql
-      - ./mysql:/docker-entrypoint-initdb.d
+      - ./mysql/initdb:/docker-entrypoint-initdb.d
+      - ./mysql/conf:/etc/mysql/conf.d
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
       - MYSQL_DATABASE=gitlab_analytics
