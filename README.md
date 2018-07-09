@@ -37,6 +37,7 @@ private_token = YourPrivateToken
 ```
   
 # Reference
+* [Install Docker-Compose](https://docs.docker.com/compose/install/)
 * [Initializing Grafana with preconfigured dashboards](https://ops.tips/blog/initialize-grafana-with-preconfigured-dashboards/)
 * [Dockerize Simple Flask App](http://containertutorials.com/docker-compose/flask-simple-app.html)
 * https://hub.docker.com/_/mariadb/
