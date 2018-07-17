@@ -8,10 +8,8 @@ from builtins import print
 import time
 import click
 import json
-from urllib import request
-from utils import get_config
 from webhook_handler import dispatch
-from gitlab_analytics_models import *
+from web import initialize_db
 
 
 @click.group()
@@ -22,12 +20,7 @@ def main():
 @main.command()
 @click.option('--log-path', '-i', required=True, help='Path of hook log')
 def event_info(**options):
-    # 查看下当前可以统计的事件
-    # 删除表重新来哦
-
-    hook_host = get_config('hook', 'host')
-    hook_port = get_config('hook', 'port')
-    req_url = "http://{}:{}/web_hook/".format(hook_host, hook_port)
+    initialize_db()
 
     line_num = 0
     for line in open(options['log_path']):
@@ -41,20 +34,19 @@ def event_info(**options):
             elif data['data']['object_kind'] == 'note':
                 ret = dispatch(data['data'])
                 print("line:{}, ret:{}".format(line_num, ret))
-            # elif data['data']['object_kind'] == 'wiki_page':
-            #     # req = request.Request(req_url)
-            #     # ret = request.urlopen(req, bytes(json.dumps(data['data']), 'utf8')).read()
-            #     ret = dispatch(data['data'])
-            #     print("line:{}, ret:{}".format(line_num, ret))
-            #
-            #     # 模拟不同时间修改，wiki的创建与修改时间没法通过事件和api读取
-            #     time.sleep(1)
-            # elif data['data']['object_kind'] == 'issue':
-            #     ret = dispatch(data['data'])
-            #     print("line:{}, ret:{}".format(line_num, ret))
-            # elif data['data']['object_kind'] == 'commit':
-            #     ret = dispatch(data['data'])
-            #     print("line:{}, ret:{}".format(line_num, ret))
+            elif data['data']['object_kind'] == 'wiki_page':
+                data['data']['timestamp'] = data['timestamp']
+                ret = dispatch(data['data'])
+                print("line:{}, ret:{}".format(line_num, ret))
+
+                # 模拟不同时间修改，wiki的创建与修改时间没法通过事件和api读取
+                time.sleep(1)
+            elif data['data']['object_kind'] == 'issue':
+                ret = dispatch(data['data'])
+                print("line:{}, ret:{}".format(line_num, ret))
+            elif data['data']['object_kind'] == 'push':
+                ret = dispatch(data['data'])
+                print("line:{}, ret:{}".format(line_num, ret))
 
         except ValueError as e:
             print(e)

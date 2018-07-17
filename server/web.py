@@ -73,8 +73,11 @@ def admin():
 
 @app.route('/web_hook/', methods=['POST'])
 def web_hook():
-    ret = dispatch(json.loads(request.get_data()))
-    return jsonify(ret)
+    try:
+        ret = dispatch(json.loads(request.get_data()))
+        return jsonify(ret)
+    except:
+        return jsonify({'ret': -1, 'message': 'Error Input Data', 'data': json.loads(request.get_data())})
 
 
 if __name__ == '__main__':

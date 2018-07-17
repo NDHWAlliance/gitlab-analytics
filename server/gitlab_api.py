@@ -22,3 +22,13 @@ def get_commit_detail(project_id, commit_id):
     return GL.projects.get(project_id).commits.get(commit_id)
 
 
+def list_all_projects():
+    return GL.projects.list(simple=True, per_page=10000)
+
+
+def list_hooks(project_id):
+    return GL.projects.get(project_id).hooks.list()
+
+
+def add_hook(project_id, url):
+    return GL.projects.get(project_id).hooks.create({'url': url})

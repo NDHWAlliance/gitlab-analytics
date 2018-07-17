@@ -5,8 +5,6 @@
 """
 import datetime
 
-import peewee
-import pymysql
 from gitlab import GitlabGetError
 
 import gitlab_api
@@ -86,7 +84,7 @@ def wiki_page(wiki_data):
                                   project_path=wiki_data['project']['path_with_namespace'],
                                   author_name=wiki_data['user']['username'],
                                   wiki_id=wiki_data['object_attributes']['slug'],
-                                  created_at=datetime.datetime.now(),
+                                  created_at=datetime.datetime.fromtimestamp(wiki_data['timestamp']) if 'timestamp' in wiki_data else datetime.datetime.now(),
                                   ignore=0,
                                   title=wiki_data['object_attributes']['title'],
                                   content_length=len(wiki_data['object_attributes']['content'])
@@ -95,12 +93,12 @@ def wiki_page(wiki_data):
                                   project_path=wiki_data['project']['path_with_namespace'],
                                   author_name=wiki_data['user']['username'],
                                   wiki_id=wiki_data['object_attributes']['slug'],
-                                  created_at=datetime.datetime.now(),
+                                  created_at=datetime.datetime.fromtimestamp(wiki_data['timestamp']) if 'timestamp' in wiki_data else datetime.datetime.now(),
                                   ignore=0,
                                   title=wiki_data['object_attributes']['title'],
                                   content_length=len(wiki_data['object_attributes']['content'])
                                   ).on_conflict_replace().execute()
-        print('{} {}'.format(wiki_data['object_attributes']['url'], len(wiki_data['object_attributes']['content'])))
+        # print('{} {}'.format(wiki_data['object_attributes']['url'], len(wiki_data['object_attributes']['content'])))
 
     # 更新的时候比对字数
     if wiki_data['object_attributes']['action'] == 'update':
@@ -108,12 +106,12 @@ def wiki_page(wiki_data):
         if create_wiki:
             content_additions = len(wiki_data['object_attributes']['content']) - create_wiki.content_length
             if content_additions > 0:
-                print('{} {} {} {}'.format(wiki_data['object_attributes']['url'], content_additions, len(wiki_data['object_attributes']['content']), create_wiki.content_length))
+                # print('{} {} {} {}'.format(wiki_data['object_attributes']['url'], content_additions, len(wiki_data['object_attributes']['content']), create_wiki.content_length))
                 GitlabWikiUpdate().insert(project=wiki_data['project']['id'],
                                           project_path=wiki_data['project']['path_with_namespace'],
                                           author_name=wiki_data['user']['username'],
                                           wiki_id=wiki_data['object_attributes']['slug'],
-                                          created_at=datetime.datetime.now(),
+                                          created_at=datetime.datetime.fromtimestamp(wiki_data['timestamp']) if 'timestamp' in wiki_data else datetime.datetime.now(),
                                           ignore=0,
                                           title=wiki_data['object_attributes']['title'],
                                           content_length=content_additions,
@@ -131,7 +129,7 @@ def merge_request(merge_request_data):
     if not merge_request_data['object_attributes']['assignee_id']:
         return
 
-    print('{} {}'.format(merge_request_data['user']['username'], merge_request_data['assignee']['username']))
+    # print('{} {}'.format(merge_request_data['user']['username'], merge_request_data['assignee']['username']))
 
     GitlabMergeRequest.insert(project=merge_request_data['project']['id'],
                               project_path=merge_request_data['project']['path_with_namespace'],
