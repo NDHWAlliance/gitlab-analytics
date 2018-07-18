@@ -31,4 +31,6 @@ def list_hooks(project_id):
 
 
 def add_hook(project_id, url):
-    return GL.projects.get(project_id).hooks.create({'url': url})
+    return GL.projects.get(project_id).hooks.create({'url': url, 'push_events': True, 'issues_events': True,
+                                                     'merge_requests_events': True, 'tag_push_events': True, 'note_events': True,
+                                                     'job_events': True, 'pipeline_events': True, 'wiki_page_events': True})

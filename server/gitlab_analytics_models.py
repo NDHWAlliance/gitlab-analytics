@@ -33,7 +33,7 @@ class GitlabCommits(BaseModel):
     line_deletions = IntegerField(null=True)
     line_total = IntegerField(null=True)
     message = CharField()
-    parent_ids = IntegerField()
+    parent_ids = CharField()
     project = IntegerField(column_name='project_id')
     project_path = CharField()
     title = CharField()
@@ -173,12 +173,4 @@ class Settings(BaseModel):
     class Meta:
         db_table = 'settings'
 
-
-if __name__ == '__main__':
-    database.drop_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate,
-                          GitlabWikiUpdate, GitlabMergeRequest, GitlabMRInitiatorComment,
-                          GitlabMRAssigneeComment, GitlabIssueComment])
-    database.create_tables([GitlabCommits, GitlabIssues, GitlabWikiCreate,
-                            GitlabWikiUpdate, GitlabMergeRequest, GitlabMRInitiatorComment,
-                            GitlabMRAssigneeComment, GitlabIssueComment])
 

@@ -49,12 +49,13 @@ def push(push_data):
                                line_additions=commit_detail.stats['additions'],
                                line_deletions=commit_detail.stats['deletions'],
                                line_total=commit_detail.stats['total'],
+                               parent_id=commit_detail.parent_ids[0],
                                ).on_conflict_replace().execute()
 
 
 def issue(issue_data):
     # 更新的issue不做统计
-    if not issue_data['object_attributes']['created_at'] != issue_data['object_attributes']['updated_at']:
+    if issue_data['object_attributes']['created_at'] != issue_data['object_attributes']['updated_at']:
         return
 
     # 兼容assignee忘记指定的情况
@@ -135,7 +136,7 @@ def merge_request(merge_request_data):
                               project_path=merge_request_data['project']['path_with_namespace'],
                               author_name=merge_request_data['user']['username'],
                               merge_request_id=merge_request_data['object_attributes']['id'],
-                              created_at=merge_request_data['object_attributes']['created_at'],
+                              created_at=gitlab_api.get_datetime(merge_request_data['object_attributes']['created_at']),
                               ignore=0,
                               title=merge_request_data['object_attributes']['title'],
                               milestone_id=merge_request_data['object_attributes']['milestone_id'],
@@ -144,6 +145,7 @@ def merge_request(merge_request_data):
     GitlabMRInitiatorComment.insert(project=merge_request_data['project']['id'],
                                     project_path=merge_request_data['project']['path_with_namespace'],
                                     author_name=merge_request_data['user']['username'],
+                                    comment_id=0,
                                     merge_request_id=merge_request_data['object_attributes']['id'],
                                     created_at=gitlab_api.get_datetime(merge_request_data['object_attributes']['created_at']),
                                     ignore=0,
@@ -158,6 +160,7 @@ def note(comment_data):
             GitlabMRInitiatorComment.insert(project=comment_data['project']['id'],
                                             project_path=comment_data['project']['path_with_namespace'],
                                             author_name=comment_data['user']['username'],
+                                            comment_id=comment_data['object_attributes']['id'],
                                             merge_request_id=comment_data['merge_request']['id'],
                                             created_at=gitlab_api.get_datetime(comment_data['object_attributes']['created_at']),
                                             ignore=0,
@@ -168,6 +171,7 @@ def note(comment_data):
             GitlabMRAssigneeComment.insert(project=comment_data['project']['id'],
                                            project_path=comment_data['project']['path_with_namespace'],
                                            author_name=comment_data['user']['username'],
+                                           comment_id=comment_data['object_attributes']['id'],
                                            merge_request_id=comment_data['merge_request']['id'],
                                            created_at=gitlab_api.get_datetime(comment_data['object_attributes']['created_at']),
                                            ignore=0,
