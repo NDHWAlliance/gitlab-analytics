@@ -33,7 +33,7 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 0,
+        "col": 3,
         "desc": true
       },
       "styles": [
@@ -63,7 +63,8 @@
           "$$hashKey": "object:172",
           "alias": "",
           "format": "table",
-          "rawSql": "select  author_name, author_email, count(*) as \"提交次数\",\n    sum(line_additions) as \"增加行数\",\n    sum(line_deletions) as \"删除行数\",\n    sum(line_total) as \"总修改行数\"\nfrom gitlab_commits\nwhere `ignore` = 0 and $__timeFilter(authored_date)\ngroup by author_name, author_email",
+          "hide": false,
+          "rawSql": "select  author_name, author_email, count(*) as \"提交次数\",\n    sum(line_additions) as \"增加行数\",\n    sum(line_deletions) as \"删除行数\",\n    sum(line_total) as \"总修改行数\"\nfrom gitlab_commits\nwhere `ignore` = 0 and $__timeFilter(authored_date) and line_additions < 2000\ngroup by author_name, author_email\n",
           "refId": "A"
         }
       ],
@@ -76,7 +77,7 @@
       "datasource": "gitlab_analytics",
       "fontSize": "100%",
       "gridPos": {
-        "h": 9,
+        "h": 5,
         "w": 12,
         "x": 0,
         "y": 7
@@ -130,8 +131,8 @@
       "datasource": "gitlab_analytics",
       "fontSize": "100%",
       "gridPos": {
-        "h": 9,
-        "w": 12,
+        "h": 5,
+        "w": 11,
         "x": 12,
         "y": 7
       },
@@ -184,10 +185,10 @@
       "datasource": "gitlab_analytics",
       "fontSize": "100%",
       "gridPos": {
-        "h": 9,
+        "h": 5,
         "w": 12,
         "x": 0,
-        "y": 16
+        "y": 12
       },
       "id": 8,
       "links": [],
@@ -195,7 +196,7 @@
       "scroll": true,
       "showHeader": true,
       "sort": {
-        "col": 0,
+        "col": 2,
         "desc": true
       },
       "styles": [
@@ -232,6 +233,230 @@
       "title": "wiki修改次数",
       "transform": "table",
       "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "gitlab_analytics",
+      "description": "作为assignee merge别人代码的次数",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 11,
+        "x": 12,
+        "y": 12
+      },
+      "id": 10,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 1,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "$$hashKey": "object:930",
+          "alias": "",
+          "format": "table",
+          "rawSql": "SELECT assignee, count(*) as \"merge次数\"\nfrom gitlab_merge_request\nwhere $__timeFilter(created_at)\ngroup by assignee;",
+          "refId": "A"
+        }
+      ],
+      "title": "merge次数",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "gitlab_analytics",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 17
+      },
+      "id": 12,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "$$hashKey": "object:1451",
+          "alias": "",
+          "format": "table",
+          "rawSql": "SELECT author_name,  sum(content_length) as \"评论字数\"\nfrom gitlab_mr_assignee_comment\nwhere $__timeFilter(created_at)\ngroup by author_name;",
+          "refId": "A"
+        }
+      ],
+      "title": "merge assignee 评论字数",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "gitlab_analytics",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 12,
+        "y": 17
+      },
+      "id": 16,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "$$hashKey": "object:2146",
+          "alias": "",
+          "format": "table",
+          "rawSql": "SELECT author_name,  sum(content_length) as \"评论字数\"\nfrom gitlab_issue_comment\nwhere $__timeFilter(created_at)\ngroup by author_name;",
+          "refId": "A"
+        },
+        {
+          "$$hashKey": "object:2205",
+          "alias": "",
+          "format": "table",
+          "rawSql": "SELECT 1",
+          "refId": "B"
+        }
+      ],
+      "title": "issue评论字数",
+      "transform": "table",
+      "type": "table"
+    },
+    {
+      "columns": [],
+      "datasource": "gitlab_analytics",
+      "fontSize": "100%",
+      "gridPos": {
+        "h": 5,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "id": 14,
+      "links": [],
+      "pageSize": null,
+      "scroll": true,
+      "showHeader": true,
+      "sort": {
+        "col": 0,
+        "desc": true
+      },
+      "styles": [
+        {
+          "alias": "Time",
+          "dateFormat": "YYYY-MM-DD HH:mm:ss",
+          "pattern": "Time",
+          "type": "date"
+        },
+        {
+          "alias": "",
+          "colorMode": null,
+          "colors": [
+            "rgba(245, 54, 54, 0.9)",
+            "rgba(237, 129, 40, 0.89)",
+            "rgba(50, 172, 45, 0.97)"
+          ],
+          "decimals": 2,
+          "pattern": "/.*/",
+          "thresholds": [],
+          "type": "number",
+          "unit": "short"
+        }
+      ],
+      "targets": [
+        {
+          "$$hashKey": "object:1892",
+          "alias": "",
+          "format": "table",
+          "rawSql": "SELECT author_name,  sum(content_length) as \"评论字数\"\nfrom gitlab_mr_initiator_comment\nwhere $__timeFilter(created_at)\ngroup by author_name;",
+          "refId": "A"
+        }
+      ],
+      "title": "merge initiator 评论字数",
+      "transform": "table",
+      "type": "table"
     }
   ],
   "schemaVersion": 16,
@@ -241,7 +466,7 @@
     "list": []
   },
   "time": {
-    "from": "now-30d",
+    "from": "now-90d",
     "to": "now"
   },
   "timepicker": {
