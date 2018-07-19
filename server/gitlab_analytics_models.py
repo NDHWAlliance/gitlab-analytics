@@ -33,7 +33,7 @@ class GitlabCommits(BaseModel):
     line_deletions = IntegerField(null=True)
     line_total = IntegerField(null=True)
     message = CharField()
-    parent_ids = CharField()
+    parent_id = CharField()
     project = IntegerField(column_name='project_id')
     project_path = CharField()
     title = CharField()

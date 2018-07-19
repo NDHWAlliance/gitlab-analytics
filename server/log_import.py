@@ -10,6 +10,7 @@ import click
 import json
 from webhook_handler import dispatch
 from web import initialize_db
+from ga_config import ga_config
 
 
 @click.group()
@@ -19,7 +20,11 @@ def main():
 
 @main.command()
 @click.option('--log-path', '-i', required=True, help='Path of hook log')
+@click.option('--gitlab-url', '-u', required=True, help='Url of Gitlab')
+@click.option('--private-token', '-k', required=True, help='Private Key')
 def event_info(**options):
+    ga_config['gitlab_url'] = options['gitlab_url']
+    ga_config['private_token'] = options['private_token']
     initialize_db()
 
     line_num = 0
