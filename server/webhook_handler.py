@@ -12,6 +12,28 @@ from gitlab_analytics_models import *
 import sys
 
 
+def add_hook(**options):
+    ids = []
+    if not options['project_ids']:
+        projects = gitlab_api.list_all_projects()
+        for project in projects:
+            ids.append(project.id)
+    else:
+        ids = options['project_ids'].split(',')
+
+    web_hook = options['web_hook']
+    for project_id in ids:
+        hooks = gitlab_api.list_hooks(project_id)
+
+        is_hooked = False
+        for hook in hooks:
+            if hook.url == web_hook:
+                is_hooked = True
+
+        if not is_hooked:
+            gitlab_api.add_hook(project_id, web_hook)
+
+
 def dispatch(event_data):
     mod = sys.modules[__name__]
     func = getattr(mod, event_data['object_kind'], None)
@@ -187,4 +209,3 @@ def note(comment_data):
                                   ignore=0,
                                   content_length=len(comment_data['object_attributes']['note'])
                                   ).on_conflict_replace().execute()
-

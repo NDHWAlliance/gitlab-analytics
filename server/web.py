@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify
+from flask import Flask, jsonify
 import os
-import json
 from gitlab_analytics_models import *
-from webhook_handler import dispatch
-from flask import render_template
+import webhook_handler
+from flask import render_template, redirect
 from flask import request
+from ga_config import ga_config
+import gitlab_api
 
 app = Flask(__name__)
 
@@ -20,11 +21,11 @@ def root():
 
 def setup_db_connection():
     # all the env here are defined in docker-compose.yml
-    mysql_host = os.getenv("MYSQL_HOST")
-    mysql_port = os.getenv("MYSQL_PORT")
-    mysql_user = os.getenv("MYSQL_USER")
-    mysql_password = os.getenv("MYSQL_PASSWORD")
-    mysql_database = os.getenv("MYSQL_DATABASE")
+    mysql_host = '127.0.0.1'
+    mysql_port = 3306
+    mysql_user = 'ga'
+    mysql_password = '4t9wegcvbYSd'
+    mysql_database = 'gitlab_analytics'
     app.logger.debug(
         "setup db connection {}@{}:{}".format(mysql_user, mysql_host,
                                               mysql_database))
@@ -46,35 +47,60 @@ def initialize_db():
                             GitlabMRInitiatorComment, Settings])
 
 
+def initialize_ga_config():
+    if not Settings.table_exists():
+        return
+
+    for name in ga_config.keys():
+        row = Settings.get_or_none(name=name)
+        if row is not None:
+            ga_config[name] = row.value
+
+
 @app.route("/admin", methods=['GET', 'POST'])
 def admin():
-    # TODO when will webhooks be added to gitlab repos?
     setup_db_connection()
-    config_names = ['external_url', 'gitlab_url', 'private_token']
     if request.method == 'POST':
         if not Settings.table_exists():
             initialize_db()
-        for name in config_names:
+        for name in ga_config.keys():
             value = request.form[name]
             s, exists = Settings.get_or_create(name=name)
             s.value = value
             s.save()
+        initialize_ga_config()
+        return redirect('add_hook')
 
-    configs = {}
-    if Settings.table_exists():
-        for name in config_names:
-            row = Settings.get_or_none(name=name)
-            if row is not None:
-                configs[name] = row.value
+    return render_template('admin.html', name="admin", **ga_config)
+
+
+@app.route('/add_hook/', methods=['GET', 'POST'])
+def add_hook():
+    if request.method == 'POST':
+        ids = request.form['project_ids']
+        webhook_handler.add_hook(project_ids=ids, web_hook=ga_config['external_url'])
+
+    # get projects with private_token
+    projects = []
+    for project in gitlab_api.list_all_projects():
+        hooked = False
+
+        for hook in gitlab_api.list_hooks(project.id):
+            if hook.url == ga_config['external_url']:
+                hooked = True
+
+        projects.append("id:{}, web_url:{} hooked: {}".format(project.id, project.web_url, hooked))
+
     app.logger.debug("configs: ")
-    app.logger.debug(configs)
-    return render_template('admin.html', name="admin", **configs)
+    app.logger.debug(ga_config)
+
+    return render_template('addhook.html', hook=ga_config['external_url'], projects=projects, **ga_config)
 
 
 @app.route('/web_hook/', methods=['POST'])
 def web_hook():
     try:
-        ret = dispatch(request.get_json())
+        ret = webhook_handler.dispatch(request.get_json())
         return jsonify(ret)
     except:
         app.logger.error("Error Data: ")
@@ -85,4 +111,5 @@ def web_hook():
 if __name__ == '__main__':
     # init_mariadb()
     port = os.getenv("PORT")
+    initialize_ga_config()
     app.run(debug=True, host='0.0.0.0', port=port)

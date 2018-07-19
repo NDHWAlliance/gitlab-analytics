@@ -4,14 +4,15 @@
     gitlab_api.py
 """
 
-from utils import get_config
 import gitlab
 import datetime
+from ga_config import ga_config
 
-URL = get_config('gitlab', 'url')
-PRIVATE_TOKEN = get_config('gitlab', 'private_token')
 
-GL = gitlab.Gitlab(URL, private_token=PRIVATE_TOKEN)
+def get_gl():
+    url = ga_config['gitlab_url']
+    private_token = ga_config['private_token']
+    return gitlab.Gitlab(url, private_token=private_token)
 
 
 def get_datetime(origin_str):
@@ -19,18 +20,18 @@ def get_datetime(origin_str):
 
 
 def get_commit_detail(project_id, commit_id):
-    return GL.projects.get(project_id).commits.get(commit_id)
+    return get_gl().projects.get(project_id).commits.get(commit_id)
 
 
 def list_all_projects():
-    return GL.projects.list(simple=True, per_page=10000)
+    return get_gl().projects.list(simple=True, per_page=10000)
 
 
 def list_hooks(project_id):
-    return GL.projects.get(project_id).hooks.list()
+    return get_gl().projects.get(project_id).hooks.list()
 
 
 def add_hook(project_id, url):
-    return GL.projects.get(project_id).hooks.create({'url': url, 'push_events': True, 'issues_events': True,
-                                                     'merge_requests_events': True, 'tag_push_events': True, 'note_events': True,
-                                                     'job_events': True, 'pipeline_events': True, 'wiki_page_events': True})
+    return get_gl().projects.get(project_id).hooks.create({'url': url, 'push_events': True, 'issues_events': True,
+                                                           'merge_requests_events': True, 'tag_push_events': True, 'note_events': True,
+                                                           'job_events': True, 'pipeline_events': True, 'wiki_page_events': True})
