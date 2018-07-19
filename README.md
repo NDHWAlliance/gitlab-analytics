@@ -45,3 +45,5 @@ private_token = YourPrivateToken
 * [Using MySQL in Grafana - Configure the Datasource with Provisioning](http://docs.grafana.org/features/datasources/mysql/#configure-the-datasource-with-provisioning)
 * [Provisioning Grafana](http://docs.grafana.org/administration/provisioning/)
 * [Webhook for gitlab's events](http://developer.dpstorm.com/help/user/project/integrations/webhooks.md)
+* [System hook for gitlab's evnets](https://docs.gitlab.com/ee/system_hooks/system_hooks.html)
+* [Python-gitlab](http://python-gitlab.readthedocs.io/en/stable/gl_objects/system_hooks.html)
