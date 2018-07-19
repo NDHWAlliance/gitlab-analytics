@@ -24,17 +24,9 @@ docker-compose up mysql grafana ga
 ```
  
 ### Configuration
-Configure your gitlab's url and private_token.
+* Step 1: Access flaks's root with port 8080, like: http://127.0.0.1:8080. Submit the configuration to access gitlab and initialize webhook for gitlab's projects.
+* Step 2: Choose the ids of projects to which you would like to add the webhook.
 
-```shell
-cd server && cp config.ini.tpl config.ini
-```
-
-```ini
-[gitlab]
-url = http://your.github.com 
-private_token = YourPrivateToken
-```
   
 # Reference
 * [Install Docker-Compose](https://docs.docker.com/compose/install/)
