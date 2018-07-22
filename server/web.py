@@ -21,11 +21,11 @@ def root():
 
 def setup_db_connection():
     # all the env here are defined in docker-compose.yml
-    mysql_host = '127.0.0.1'
-    mysql_port = 3306
-    mysql_user = 'ga'
-    mysql_password = '4t9wegcvbYSd'
-    mysql_database = 'gitlab_analytics'
+    mysql_host = os.getenv('MYSQL_HOST','127.0.0.1')
+    mysql_port = os.getenv('MYSQL_PORT',3306)
+    mysql_user = os.getenv('MYSQL_USER','ga')
+    mysql_password = os.getenv('MYSQL_PASSWORD','4t9wegcvbYSd')
+    mysql_database = os.getenv('MYSQL_DATABASE','gitlab_analytics')
     app.logger.debug(
         "setup db connection {}@{}:{}".format(mysql_user, mysql_host,
                                               mysql_database))
@@ -48,6 +48,7 @@ def initialize_db():
 
 
 def initialize_ga_config():
+    setup_db_connection()
     if not Settings.table_exists():
         return
 
