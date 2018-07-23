@@ -16,7 +16,7 @@ def root():
     initialize_ga_config()
 
     if not ga_config['external_url']:
-        ga_config['external_url'] = '{}/web_hook/'.format(request.base_url)
+        ga_config['external_url'] = '{}web_hook/'.format(request.base_url)
 
     return render_template('admin.html', name="admin", **ga_config)
 
