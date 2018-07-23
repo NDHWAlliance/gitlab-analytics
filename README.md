@@ -24,8 +24,9 @@ docker-compose up mysql grafana ga
 ```
  
 ### Configuration
-* Step 1: Access flaks's root with port 8080, like: http://127.0.0.1:8080. Submit the configuration to access gitlab and initialize webhook for gitlab's projects.
-* Step 2: Choose the projects that you would like to add the webhook.
+* Step 1: Access flaks's root with port 8080, like: http://127.0.0.1:8080. Submit the configuration to access gitlab and initialize webhook for gitlab's projects. Default webhook(External Url) is the '$base_url/web_hook/' like http://127.0.0.1:8080/web_hook/.
+* Step 2: In the addhook page, choose the projects that you would like to add the webhook.
+* Step 3: If you would like to bind the webhook to your new project automatically, just configure the system hook '$base_url/system_hook' to your gitlab， like: http:/127.0.0.1:8080/system_hook/.
 
   
 # Reference
