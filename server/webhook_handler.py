@@ -204,6 +204,7 @@ def note(comment_data):
         GitlabIssueComment.insert(project=comment_data['project']['id'],
                                   project_path=comment_data['project']['path_with_namespace'],
                                   author_name=comment_data['user']['username'],
+                                  comment_id=comment_data['object_attributes']['id'],
                                   issue_id=comment_data['issue']['id'],
                                   created_at=gitlab_api.get_datetime(comment_data['object_attributes']['created_at']),
                                   ignore=0,
