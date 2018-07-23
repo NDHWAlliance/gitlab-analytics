@@ -86,19 +86,43 @@ def add_hook():
     # get projects with private_token
     projects = []
     for project in gitlab_api.list_all_projects():
-        hooked = False
+        hooked = 0
 
         for hook in gitlab_api.list_hooks(project.id):
             if hook.url == ga_config['external_url']:
-                hooked = True
+                hooked = 1
 
-        projects.append("id:{}, web_url:{} hooked: {}".format(project.id, project.web_url, hooked))
+        #projects.append("id:{}, web_url:{} hooked: {}".format(project.id, project.web_url, hooked))
+        projects.append({
+            "id": project.id,
+            "url": project.web_url,
+            "hooked": hooked,
+            "loading": 0
 
-    app.logger.debug("configs: ")
-    app.logger.debug(ga_config)
+        })
 
-    return render_template('addhook.html', hook=ga_config['external_url'], projects=projects, **ga_config)
+    app.logger.debug("projects: ")
+    app.logger.info(projects)
 
+
+    return render_template('addhook2.html', hook=ga_config['external_url'], projects=projects, **ga_config)
+
+@app.route('/add_hook_to_project', methods=['POST'])
+def add_hook_to_project():
+    data = request.get_json()
+    project_id = data['id']
+    webhook_handler.add_hook(project_ids=str(project_id),
+                             web_hook=ga_config['external_url'])
+    # fixme need better response
+    return ""
+
+@app.route('/remove_hook_from_project', methods=['POST'])
+def remove_hook_from_project():
+    data = request.get_json()
+    project_id = data['id']
+    gitlab_api.remove_hook(project_id, ga_config['external_url'])
+    # fixme need better response
+    return ""
 
 @app.route('/web_hook/', methods=['POST'])
 def web_hook():

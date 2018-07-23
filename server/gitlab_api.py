@@ -35,3 +35,14 @@ def add_hook(project_id, url):
     return get_gl().projects.get(project_id).hooks.create({'url': url, 'push_events': True, 'issues_events': True,
                                                            'merge_requests_events': True, 'tag_push_events': True, 'note_events': True,
                                                            'job_events': True, 'pipeline_events': True, 'wiki_page_events': True})
+
+def remove_hook(project_id, url):
+    project = get_gl().projects.get(project_id)
+    hooks = project.hooks.list()
+    hook_id = None
+    for hook in hooks:
+        if hook.url == url:
+            hook_id = hook.id
+            break
+    if hook_id is not None:
+        project.hooks.delete(hook_id)
