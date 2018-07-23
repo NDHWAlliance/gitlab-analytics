@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 import os
 from gitlab_analytics_models import *
 import webhook_handler
+import system_hook_handler
 from flask import render_template, redirect
 from flask import request
 from ga_config import ga_config
@@ -12,20 +13,21 @@ app = Flask(__name__)
 
 @app.route("/", methods=['GET'])
 def root():
-    # TODO read config values from DB
-    gitlab_url = ""
-    private_token = ""
-    return render_template('admin.html', name="admin", gitlab_url=gitlab_url,
-                           private_token=private_token)
+    initialize_ga_config()
+
+    if not ga_config['external_url']:
+        ga_config['external_url'] = '{}/web_hook/'.format(request.base_url)
+
+    return render_template('admin.html', name="admin", **ga_config)
 
 
 def setup_db_connection():
     # all the env here are defined in docker-compose.yml
-    mysql_host = os.getenv('MYSQL_HOST','127.0.0.1')
-    mysql_port = os.getenv('MYSQL_PORT',3306)
-    mysql_user = os.getenv('MYSQL_USER','ga')
-    mysql_password = os.getenv('MYSQL_PASSWORD','4t9wegcvbYSd')
-    mysql_database = os.getenv('MYSQL_DATABASE','gitlab_analytics')
+    mysql_host = os.getenv('MYSQL_HOST', '127.0.0.1')
+    mysql_port = os.getenv('MYSQL_PORT', 3306)
+    mysql_user = os.getenv('MYSQL_USER', 'ga')
+    mysql_password = os.getenv('MYSQL_PASSWORD', '4t9wegcvbYSd')
+    mysql_database = os.getenv('MYSQL_DATABASE', 'gitlab_analytics')
     app.logger.debug(
         "setup db connection {}@{}:{}".format(mysql_user, mysql_host,
                                               mysql_database))
@@ -102,6 +104,17 @@ def add_hook():
 def web_hook():
     try:
         ret = webhook_handler.dispatch(request.get_json())
+        return jsonify(ret)
+    except:
+        app.logger.error("Error Data: ")
+        app.logger.error(request.get_json())
+        return jsonify({'ret': -1, 'message': 'Error Input Data'})
+
+
+@app.route('/system_hook/', methods=['POST'])
+def system_hook():
+    try:
+        ret = system_hook_handler.dispatch(request.get_json())
         return jsonify(ret)
     except:
         app.logger.error("Error Data: ")

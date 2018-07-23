@@ -25,6 +25,7 @@ def main():
 def event_info(**options):
     ga_config['gitlab_url'] = options['gitlab_url']
     ga_config['private_token'] = options['private_token']
+    setup_db_connection()
     initialize_db()
 
     line_num = 0
