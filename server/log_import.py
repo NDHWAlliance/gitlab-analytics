@@ -10,6 +10,7 @@ import click
 import json
 from webhook_handler import dispatch
 from web import initialize_db
+from web import setup_db_connection
 from ga_config import ga_config
 
 
