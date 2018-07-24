@@ -34,6 +34,7 @@ services:
   grafana:
     image: grafana/grafana:5.1.4
     container_name: grafana
+    user: root
     volumes:
       - ./grafana/:/etc/grafana/
       - ./data/grafana:/var/lib/grafana
