@@ -77,22 +77,17 @@ def admin():
     return render_template('admin.html', name="admin", **ga_config)
 
 
-@app.route('/add_hook/', methods=['GET', 'POST'])
+@app.route('/add_hook/', methods=['GET'])
 def add_hook():
-    if request.method == 'POST':
-        ids = request.form['project_ids']
-        webhook_handler.add_hook(project_ids=ids, web_hook=ga_config['external_url'])
-
     # get projects with private_token
     projects = []
     for project in gitlab_api.list_all_projects():
-        hooked = 0
 
-        for hook in gitlab_api.list_hooks(project.id):
-            if hook.url == ga_config['external_url']:
-                hooked = 1
+        if webhook_handler.is_hooked(project.id, ga_config['external_url']):
+            hooked = 1
+        else:
+            hooked = 0
 
-        #projects.append("id:{}, web_url:{} hooked: {}".format(project.id, project.web_url, hooked))
         projects.append({
             "id": project.id,
             "url": project.web_url,
@@ -102,19 +97,20 @@ def add_hook():
         })
 
     app.logger.debug("projects: ")
-    app.logger.info(projects)
+    app.logger.error(len(projects))
 
+    return render_template('addhook2.html', hook=ga_config['external_url'],
+                           projects=projects, **ga_config)
 
-    return render_template('addhook2.html', hook=ga_config['external_url'], projects=projects, **ga_config)
 
 @app.route('/add_hook_to_project', methods=['POST'])
 def add_hook_to_project():
     data = request.get_json()
     project_id = data['id']
-    webhook_handler.add_hook(project_ids=str(project_id),
-                             web_hook=ga_config['external_url'])
+    webhook_handler.add_hook(project_id, ga_config['external_url'])
     # fixme need better response
     return ""
+
 
 @app.route('/remove_hook_from_project', methods=['POST'])
 def remove_hook_from_project():
@@ -123,6 +119,7 @@ def remove_hook_from_project():
     gitlab_api.remove_hook(project_id, ga_config['external_url'])
     # fixme need better response
     return ""
+
 
 @app.route('/web_hook/', methods=['POST'])
 def web_hook():

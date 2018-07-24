@@ -12,26 +12,23 @@ from gitlab_analytics_models import *
 import sys
 
 
-def add_hook(**options):
-    ids = []
-    if not options['project_ids']:
-        projects = gitlab_api.list_all_projects()
-        for project in projects:
-            ids.append(project.id)
-    else:
-        ids = options['project_ids'].split(',')
+def is_hooked(project_id, web_hook):
+    for hook in gitlab_api.list_hooks(project_id):
+        if hook.url == web_hook:
+            return True
+    return False
 
-    web_hook = options['web_hook']
-    for project_id in ids:
-        hooks = gitlab_api.list_hooks(project_id)
 
-        is_hooked = False
-        for hook in hooks:
-            if hook.url == web_hook:
-                is_hooked = True
+def add_hook(project_id, web_hook):
+    if not is_hooked(project_id, web_hook):
+        gitlab_api.add_hook(project_id, web_hook)
 
-        if not is_hooked:
-            gitlab_api.add_hook(project_id, web_hook)
+
+def remove_hook(project_id, web_hook):
+    # gitlab_api.remove_hook iterate all web hooks to find the hook id and
+    # then remove the web hook
+    # so here we do not need to check is_hooked
+    gitlab_api.remove_hook(project_id, web_hook)
 
 
 def dispatch(event_data):

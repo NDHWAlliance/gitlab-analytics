@@ -24,7 +24,7 @@ def get_commit_detail(project_id, commit_id):
 
 
 def list_all_projects():
-    return get_gl().projects.list(simple=True, per_page=10000)
+    return get_gl().projects.list(order_by='last_activity_at', as_list=False)
 
 
 def list_hooks(project_id):
