@@ -13,6 +13,8 @@
 * comments
 * merge-requests
 
+![alt text](https://github.com/NDHWAlliance/gitlab-analytics/blob/master/display.jpeg)
+
 # Installation
 
 ### Intialize with Docker
