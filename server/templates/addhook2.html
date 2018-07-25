@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="zh-cmn-Hans">
+
+<head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"
+          rel="stylesheet">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+          href="https://cdn.bootcss.com/bootstrap/4.1.1/css/bootstrap.min.css"
+          integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB"
+          crossorigin="anonymous">
+    <style>
+        .fixedwidthbutton1 {
+            width: 150px !important;
+        }
+
+        .fixedwidthbutton2 {
+            width: 300px !important;
+        }
+    </style>
+    <title>GitLab Analytics Admin</title>
+</head>
+
+<body>
+<div id="app" class="container">
+    <div class="container">
+        <h1>Add hook to your gitlab's projects</h1>
+        <button type="button" class="btn btn-success fixedwidthbutton2"
+                v-on:click="add_all">Add webhook to all projects
+        </button>
+        <button type="button" class="btn btn-danger fixedwidthbutton2"
+                v-on:click="remove_all">Remove webhook from all projects
+        </button>
+    </div>
+    <hr>
+    <table class="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>URL</th>
+            <th>HOOK</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr v-for="project in projects" :key="project.id">
+            <td>${project.id}</td>
+            <td>${project.url}</td>
+            <td>
+                <button type="button" v-on:click="toggle_hook(project)"
+                        class="btn btn-sm fixedwidthbutton1"
+                        v-bind:class="project.loading ? '': (project.hooked ? 'btn-success' : 'btn-danger')"
+                        v-html="project.loading ? '<i class=\'fa fa-circle-o-notch fa-spin\'></i> loading...' : (project.hooked ? 'Remove webhook' : 'Add webhook')"></button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+<script src="https://cdn.bootcss.com/bootstrap/4.1.1/js/bootstrap.min.js"
+        integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T"
+        crossorigin="anonymous"></script>
+<script src="https://cdn.bootcss.com/vue/2.5.16/vue.min.js"></script>
+<script src="https://cdn.bootcss.com/axios/0.18.0/axios.min.js"></script>
+<script>
+    var projects = {{ projects | safe }}
+
+    // refercence https://gist.github.com/steve-taylor/5075717#gistcomment-1623912
+
+    function doSynchronousLoop(data, processData, done) {
+        if (data.length > 0) {
+            var loop = function (data, i, processData, done) {
+                processData(data[i], i, function () {
+                    if (++i < data.length) {
+                        setTimeout(function () {
+                            loop(data, i, processData, done);
+                        }, 0);
+                    } else {
+                        done();
+                    }
+                });
+            };
+            loop(data, 0, processData, done);
+        } else {
+            done();
+        }
+    }
+
+    function add_webhook(project, index, cb) {
+        if (project.hooked == 1) {
+            setTimeout(cb, 0);
+            return;
+        }
+        project.loading = 1;
+        axios.post('/add_hook_to_project', {
+            id: project.id
+        }).then(function (response) {
+            console.log(response);
+            project.loading = 0;
+            project.hooked = 1;
+            cb();
+
+        }).catch(function (error) {
+            console.log(error);
+            project.loading = 0;
+            cb();
+        });
+    }
+
+    function remove_webhook(project, index, cb) {
+        if (project.hooked == 0) {
+            setTimeout(cb, 0);
+            return;
+        }
+        project.loading = 1;
+
+        axios.post('/remove_hook_from_project', {
+            id: project.id
+        }).then(function (response) {
+            console.log(response);
+            project.loading = 0;
+            project.hooked = 0;
+            cb();
+
+        }).catch(function (error) {
+            console.log(error);
+            project.loading = 0;
+            cb();
+        });
+    }
+
+    var app = new Vue({
+        delimiters: ['${', '}'],
+        el: '#app',
+        data: {
+            projects: projects
+        },
+        methods: {
+            add_all: function (event) {
+                event.target.disabled = 1;
+                doSynchronousLoop(this.projects, add_webhook, function () {
+                    event.target.disabled = 0;
+                });
+            },
+            remove_all: function (event) {
+                event.target.disabled = 1;
+                doSynchronousLoop(this.projects, remove_webhook, function () {
+                    event.target.disabled = 0;
+                });
+            },
+            toggle_hook: function (project) {
+                if (project.loading === 1) {
+                    return;
+                }
+                project.loading = 1;
+
+                if (project.hooked == 0) {
+                    add_webhook(project, 0, function () {
+                        project.loading = 0;
+                    });
+                } else {
+                    remove_webhook(project, 0, function () {
+                        project.loading = 0;
+                    })
+                }
+            }
+        }
+    })
+</script>
+</body>
+
+</html>

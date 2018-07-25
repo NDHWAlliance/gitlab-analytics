@@ -1,0 +1,7 @@
+.idea
+*.pyc
+server/*env
+*.egg-info
+*.swp
+data
+server/config.ini
