@@ -36,10 +36,7 @@ def dispatch(event_data):
     func = getattr(mod, event_data['object_kind'], None)
 
     if func is not None:
-        try:
-            func(event_data)
-        except GitlabGetError as e:
-            return {"ret": e.response_code, "message": e.error_message, "data": event_data}
+        func(event_data)
 
     return {"ret": 0}
 
