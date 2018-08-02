@@ -12,6 +12,7 @@ setting_keys = ['external_url', 'gitlab_url', 'private_token']
 
 
 def connect():
+    global _connected
     if _connected:
         return
     mysql_host = app.config['mysql_host']
@@ -27,6 +28,7 @@ def connect():
                                'user': mysql_user,
                                'password': str(mysql_password),
                                'charset': 'utf8', 'use_unicode': True}
+    _connected = True
 
 
 def is_initialized():

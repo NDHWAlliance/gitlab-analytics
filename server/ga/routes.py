@@ -79,7 +79,7 @@ def settings():
     for name in dbservice.setting_keys:
         d[name] = app.config[name]
     if len(d['external_url']) == 0:
-        d['external_url'] = request.url_root + "web_hook"
+        d['external_url'] = request.url_root + "web_hook/"
     return render_template('admin/settings.html', **d)
 
 
@@ -108,6 +108,7 @@ def remove_hook_from_project():
     return ""
 
 
+@mod.route('/web_hook', methods=['POST'])
 @mod.route('/web_hook/', methods=['POST'])
 def web_hook():
     try:
@@ -119,6 +120,7 @@ def web_hook():
         return jsonify({'ret': -1, 'message': 'Error Input Data'})
 
 
+@mod.route('/system_hook', methods=['POST'])
 @mod.route('/system_hook/', methods=['POST'])
 def system_hook():
     try:

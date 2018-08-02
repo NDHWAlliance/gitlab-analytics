@@ -46,8 +46,14 @@ def push(push_data):
         commit_detail = gitlab_api.get_commit_detail(push_data['project_id'], commit['id'])
 
         # merge的和提交超过2000行的忽略
-        if len(commit_detail.parent_ids) is not 1:
+        # 仓库的第一个commit，parent_ids = 0
+        # merge 操作, parent_ids = 2
+        l = len(commit_detail.parent_ids)
+        parent_id = ''
+        if l > 1:
             continue
+        elif l == 1:
+            parent_id = commit_detail.parent_ids[0]
 
         GitlabCommits().insert(project=push_data['project']['id'],
                                project_path=push_data['project']['path_with_namespace'],
@@ -65,7 +71,7 @@ def push(push_data):
                                line_additions=commit_detail.stats['additions'],
                                line_deletions=commit_detail.stats['deletions'],
                                line_total=commit_detail.stats['total'],
-                               parent_id=commit_detail.parent_ids[0],
+                               parent_id=parent_id,
                                ).on_conflict_replace().execute()
 
 
