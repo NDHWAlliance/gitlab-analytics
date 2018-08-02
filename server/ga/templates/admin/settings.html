@@ -4,18 +4,27 @@
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    <link rel="icon" href="{{ url_for('.static', filename='favicon.ico') }}">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
 
     <title>GitLab Analytics Admin</title>
   </head>
   <body>
+
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href="#">
+            <img src="{{ url_for('.static', filename='ga.png') }}" height="30" class="d-inline-block align-top" alt="">
+            Gitlab Analytics
+        </a>
+        <a class="btn btn-outline-primary" href="{{ url_for('.signout') }}">Sign out</a>
+    </nav>
+
     <div class="container">
 
         <h1>Hello, {{ name }}!</h1>
 
-        <form action="/admin" method="post">
+        <form action="{{ url_for('.settings') }}" method="post">
           <div class="form-group">
             <label for="exampleInputEmail1">GitLab Analytics External URL</label>
             <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter GitLab Analytics External URL" name="external_url" value="{{ external_url }}">
@@ -27,7 +36,7 @@
           </div>
           <div class="form-group">
             <label for="exampleInputPassword12">GitLab Private Token</label>
-            <input type="text" class="form-control" id="exampleInputPassword12" placeholder="GitLab Private Token" name="private_token" value ="">
+            <input type="text" class="form-control" id="exampleInputPassword12" placeholder="GitLab Private Token" name="private_token" value ="{{ private_token }}">
           </div>
           <button type="submit" class="btn btn-primary">Submit</button>
         </form>

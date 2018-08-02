@@ -6,7 +6,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
+    <link rel="icon" href="{{ url_for('.static', filename='favicon.ico') }}">
     <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css"
           rel="stylesheet">
     <!-- Bootstrap CSS -->
@@ -27,6 +27,13 @@
 </head>
 
 <body>
+    <nav class="navbar navbar-light bg-light">
+        <a class="navbar-brand" href="#">
+            <img src="{{ url_for('.static', filename='ga.png') }}" height="30" class="d-inline-block align-top" alt="">
+            Gitlab Analytics
+        </a>
+        <a class="btn btn-outline-primary" href="{{ url_for('.signout') }}">Sign out</a>
+    </nav>
 <div id="app" class="container">
     <div class="container">
         <h1>Add hook to your gitlab's projects</h1>

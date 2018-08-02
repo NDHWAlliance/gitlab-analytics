@@ -4,4 +4,11 @@ dev:
 	MYSQL_USER=ga \
 	MYSQL_PASSWORD=4t9wegcvbYSd \
 	MYSQL_DATABASE=gitlab_analytics \
-	python3 server/web.py
+	PORT=8080 \
+	python3 server/run.py
+
+image:
+	docker-compose build --build-arg INDEX_URL=https://mirrors.aliyun.com/pypi/simple ga
+
+run:
+	docker-compose up ga

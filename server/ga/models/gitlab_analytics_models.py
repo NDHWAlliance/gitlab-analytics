@@ -13,7 +13,6 @@ database = MySQLDatabase('gitlab_analytics',
                             'password': '4t9wegcvbYSd'})
 
 
-
 class BaseModel(Model):
     class Meta:
         database = database
@@ -172,5 +171,3 @@ class Settings(BaseModel):
 
     class Meta:
         db_table = 'settings'
-
-
