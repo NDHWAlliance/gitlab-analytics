@@ -6,4 +6,4 @@ COPY requirements.txt /app/
 RUN pip install -i $INDEX_URL -r requirements.txt
 COPY . /app
 ENTRYPOINT ["python"]
-CMD ["web.py"]
+CMD ["run.py"]

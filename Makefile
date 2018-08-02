@@ -4,4 +4,4 @@ dev:
 	MYSQL_USER=ga \
 	MYSQL_PASSWORD=4t9wegcvbYSd \
 	MYSQL_DATABASE=gitlab_analytics \
-	python3 server/web.py
+	python3 server/run.py

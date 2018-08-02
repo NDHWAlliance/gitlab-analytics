@@ -4,12 +4,12 @@
     webhook_handler.py
 """
 import datetime
+import sys
 
 from gitlab import GitlabGetError
 
-import gitlab_api
-from gitlab_analytics_models import *
-import sys
+from ..models.gitlab_analytics_models import *
+from . import gitlabservice as gitlab_api
 
 
 def is_hooked(project_id, web_hook):
