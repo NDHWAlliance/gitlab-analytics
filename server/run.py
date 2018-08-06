@@ -3,4 +3,4 @@ import os
 
 port = os.getenv('PORT')
 app = create_app()
-app.run(host='0.0.0.0', debug=True, port=port)
+app.run(host='0.0.0.0', port=port)

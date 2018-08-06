@@ -5,6 +5,8 @@ dev:
 	MYSQL_PASSWORD=4t9wegcvbYSd \
 	MYSQL_DATABASE=gitlab_analytics \
 	PORT=8080 \
+	FLASK_ENV=development \
+	FLASK_DEBUG=1 \
 	python3 server/run.py
 
 image:
