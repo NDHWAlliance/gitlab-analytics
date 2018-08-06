@@ -15,16 +15,44 @@ from .services import gitlabservice
 from .services import systemhookservice
 from .services import webhookservice
 
-mod = Blueprint('ga', __name__, template_folder="templates",
-                static_folder='static')
+bp = Blueprint('ga', __name__, template_folder="templates",
+               static_folder='static')
 
 
-@mod.route('/', methods=['GET'])
+@bp.before_request
+def load_settings_from_db():
+    app.logger.info("load_settings_from_db " + request.endpoint)
+    if request.endpoint in ['ga.setup', 'ga.get_db_status']:
+        return
+    connected, message = dbservice.connect()
+    if not connected:
+        # 在 setup 页面，轮询 get_db_status，等待mysql连接成功
+        return redirect(url_for('.setup'))
+    if not dbservice.is_initialized():
+        dbservice.initialize()
+    dbservice.load_settings()
+
+
+@bp.route('/', methods=['GET'])
 def root_route():
     return redirect(url_for('.settings'))
 
 
-@mod.route('/signup', methods=['GET', 'POST'])
+@bp.route('/setup', methods=['GET', 'POST'])
+def setup():
+    app.logger.info(app.config)
+    s = "{mysql_user}@{mysql_host}:{mysql_port}/{mysql_database}".format(
+        **app.config)
+    return render_template('admin/setup.html', connection_string=s)
+
+
+@bp.route('/get_db_status', methods=['GET'])
+def get_db_status():
+    connected, message = dbservice.connect()
+    return jsonify({"connected": connected, "message": message})
+
+
+@bp.route('/signup', methods=['GET', 'POST'])
 def signup():
     if dbservice.password_exists():
         return redirect(url_for('.signin'))
@@ -36,7 +64,7 @@ def signup():
     return render_template('admin/signup.html')
 
 
-@mod.route('/signin', methods=['GET', 'POST'])
+@bp.route('/signin', methods=['GET', 'POST'])
 def signin():
     if request.method == 'POST':
         password = request.form["password"]
@@ -58,13 +86,13 @@ def signin():
     return render_template('admin/signin.html')
 
 
-@mod.route('/signout', methods=['GET'])
+@bp.route('/signout', methods=['GET'])
 def signout():
     flask_login.logout_user()
     return redirect(url_for('.signin'))
 
 
-@mod.route('/settings', methods=['GET', 'POST'])
+@bp.route('/settings', methods=['GET', 'POST'])
 @login_required
 def settings():
     if request.method == 'POST':
@@ -83,14 +111,14 @@ def settings():
     return render_template('admin/settings.html', **d)
 
 
-@mod.route('/hooks', methods=['GET'])
+@bp.route('/hooks', methods=['GET'])
 @login_required
 def hooks():
     projects = gitlabservice.get_projects()
     return render_template('admin/hooks.html', projects=projects)
 
 
-@mod.route('/add_hook_to_project', methods=['POST'])
+@bp.route('/add_hook_to_project', methods=['POST'])
 def add_hook_to_project():
     data = request.get_json()
     project_id = data['id']
@@ -99,7 +127,7 @@ def add_hook_to_project():
     return ""
 
 
-@mod.route('/remove_hook_from_project', methods=['POST'])
+@bp.route('/remove_hook_from_project', methods=['POST'])
 def remove_hook_from_project():
     data = request.get_json()
     project_id = data['id']
@@ -108,8 +136,8 @@ def remove_hook_from_project():
     return ""
 
 
-@mod.route('/web_hook', methods=['POST'])
-@mod.route('/web_hook/', methods=['POST'])
+@bp.route('/web_hook', methods=['POST'])
+@bp.route('/web_hook/', methods=['POST'])
 def web_hook():
     try:
         ret = webhookservice.dispatch(request.get_json())
@@ -120,8 +148,8 @@ def web_hook():
         return jsonify({'ret': -1, 'message': 'Error Input Data'})
 
 
-@mod.route('/system_hook', methods=['POST'])
-@mod.route('/system_hook/', methods=['POST'])
+@bp.route('/system_hook', methods=['POST'])
+@bp.route('/system_hook/', methods=['POST'])
 def system_hook():
     try:
         ret = systemhookservice.dispatch(request.get_json())

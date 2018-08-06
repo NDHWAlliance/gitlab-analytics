@@ -1,3 +1,4 @@
+import peewee
 from flask import current_app as app
 from ..models.gitlab_analytics_models import *
 import hashlib
@@ -5,16 +6,10 @@ import hashlib
 # use python module as singleton
 # so we don't need to create a DBService class here
 
-_connected = False
-_initialized = False
-
 setting_keys = ['external_url', 'gitlab_url', 'private_token']
 
 
 def connect():
-    global _connected
-    if _connected:
-        return
     mysql_host = app.config['mysql_host']
     mysql_port = app.config['mysql_port']
     mysql_user = app.config['mysql_user']
@@ -28,15 +23,15 @@ def connect():
                                'user': mysql_user,
                                'password': str(mysql_password),
                                'charset': 'utf8', 'use_unicode': True}
-    _connected = True
+    try:
+        _connected = database.connect()
+    except peewee.OperationalError as err:
+        return False, str(err)
+    return _connected, "success"
 
 
 def is_initialized():
-    global _initialized
-    if _initialized:
-        return True
-    _initialized = Settings.table_exists()
-    return _initialized
+    return Settings.table_exists()
 
 
 def initialize():
@@ -47,8 +42,6 @@ def initialize():
                             GitlabWikiUpdate, GitlabIssueComment,
                             GitlabMergeRequest, GitlabMRAssigneeComment,
                             GitlabMRInitiatorComment, Settings])
-    global _initialized
-    _initialized = True
 
 
 def password_exists():
