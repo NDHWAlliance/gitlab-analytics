@@ -14,3 +14,10 @@ image:
 
 run:
 	docker-compose up ga
+
+cleandb:
+	-docker rm --force mysql
+	rm -rf data/db/
+
+test:
+	cd server && python3 -m pytest --cov=ga --cov-report html

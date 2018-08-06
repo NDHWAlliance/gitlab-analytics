@@ -25,10 +25,13 @@ def connect():
                                'password': str(mysql_password),
                                'charset': 'utf8', 'use_unicode': True}
     try:
-        _connected = database.connect()
+        # http://docs.peewee-orm.com/en/latest/peewee/database.html#connection-management
+        # 单元测试的时候 Settings 表会被bind到一个fake database 上。
+        if Settings._meta.database.is_closed():
+            Settings._meta.database.connect()
     except peewee.OperationalError as err:
         return False, str(err)
-    return _connected, "success"
+    return True, "success"
 
 
 def is_initialized():

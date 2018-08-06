@@ -5,3 +5,6 @@ server/*env
 *.swp
 data
 server/config.ini
+.pytest_cache
+htmlcov
+.coverage
