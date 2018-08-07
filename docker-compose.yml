@@ -1,4 +1,4 @@
-version: '2'
+version: '2.1'
 
 services:
   ga:
@@ -15,6 +15,10 @@ services:
       - mysql
     ports:
       - "8080:8080"
+    networks:
+      ganet:
+        aliases:
+          - gaserver
 
   mysql:
     image: mariadb:5.5.60
@@ -30,7 +34,8 @@ services:
       - MYSQL_DATABASE=gitlab_analytics
       - MYSQL_USER=ga
       - MYSQL_PASSWORD=4t9wegcvbYSd
-
+    networks:
+      - ganet
   grafana:
     image: grafana/grafana:5.1.4
     container_name: grafana
@@ -42,4 +47,9 @@ services:
       - mysql
     ports:
       - "3000:3000"
-
+    networks:
+      - ganet
+networks:
+  ganet:
+    name: "ganet"
+    driver: bridge

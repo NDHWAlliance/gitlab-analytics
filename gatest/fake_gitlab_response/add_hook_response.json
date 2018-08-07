@@ -1,0 +1,18 @@
+{
+  "id": 381,
+  "url": "http://127.0.0.1:8080/webhook/",
+  "created_at": "2018-08-07T15:46:42.061+08:00",
+  "push_events": true,
+  "tag_push_events": false,
+  "merge_requests_events": false,
+  "repository_update_events": false,
+  "enable_ssl_verification": true,
+  "project_id": 1,
+  "issues_events": false,
+  "confidential_issues_events": false,
+  "note_events": false,
+  "confidential_note_events": null,
+  "pipeline_events": false,
+  "wiki_page_events": false,
+  "job_events": false
+}

@@ -21,3 +21,15 @@ cleandb:
 
 test:
 	cd server && python3 -m pytest --cov=ga --cov-report html
+
+integration:
+	cd server && docker build -t ga-test:latest -f Dockerfile .
+	cd gatest && \
+		docker run -d -it --rm -v `pwd`:/app \
+		--network ganet --network-alias fakegitlab --name fakegitlab ga-test:latest \
+		fakegitlab.py --host 0.0.0.0 --port 8081
+	cd gatest && \
+		docker run -it --rm -v `pwd`:/app \
+		--network ganet ga-test:latest \
+		gatest.py --ga-url "http://gaserver:8080" --gitlab-url "http://fakegitlab:8081"
+	docker stop fakegitlab
