@@ -1,6 +1,5 @@
 node {
    stage('Preparation') { // for display purposes
-      git 'https://github.com/NDHWAlliance/gitlab-analytics.git'
       sh "(docker network ls | grep ganet) || docker network create ganet"
       sh "docker rm --force gaserver mysql fakegitlab || echo ok"
    }
