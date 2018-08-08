@@ -51,5 +51,4 @@ services:
       - ganet
 networks:
   ganet:
-    name: "ganet"
     driver: bridge
