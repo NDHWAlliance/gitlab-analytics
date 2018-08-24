@@ -5,14 +5,12 @@
 """
 from builtins import print
 
+import gitlab
 import time
 import click
 import json
-from webhook_handler import dispatch
-from web import initialize_db
-from web import setup_db_connection
-from ga_config import ga_config
-
+from .ga.services.webhookservice import dispatch
+from .ga.services import gitlabservice
 
 @click.group()
 def main():
@@ -24,10 +22,7 @@ def main():
 @click.option('--gitlab-url', '-u', required=True, help='Url of Gitlab')
 @click.option('--private-token', '-k', required=True, help='Private Key')
 def event_info(**options):
-    ga_config['gitlab_url'] = options['gitlab_url']
-    ga_config['private_token'] = options['private_token']
-    setup_db_connection()
-    initialize_db()
+    gitlabservice._gl = gitlab.Gitlab(options['gitlab_url'], options['private_token'])
 
     line_num = 0
     for line in open(options['log_path']):
@@ -35,23 +30,24 @@ def event_info(**options):
 
         try:
             data = json.loads(line[0:-1].replace('\n', '\\n'))
-            if data['data']['object_kind'] == 'merge_request':
-                ret = dispatch(data['data'])
-                print("line:{}, ret:{}".format(line_num, ret))
-            elif data['data']['object_kind'] == 'note':
-                ret = dispatch(data['data'])
-                print("line:{}, ret:{}".format(line_num, ret))
-            elif data['data']['object_kind'] == 'wiki_page':
-                data['data']['timestamp'] = data['timestamp']
-                ret = dispatch(data['data'])
-                print("line:{}, ret:{}".format(line_num, ret))
-
-                # 模拟不同时间修改，wiki的创建与修改时间没法通过事件和api读取
-                time.sleep(1)
-            elif data['data']['object_kind'] == 'issue':
-                ret = dispatch(data['data'])
-                print("line:{}, ret:{}".format(line_num, ret))
-            elif data['data']['object_kind'] == 'push':
+            # if data['data']['object_kind'] == 'merge_request':
+            #     ret = dispatch(data['data'])
+            #     print("line:{}, ret:{}".format(line_num, ret))
+            # elif data['data']['object_kind'] == 'note':
+            #     ret = dispatch(data['data'])
+            #     print("line:{}, ret:{}".format(line_num, ret))
+            # elif data['data']['object_kind'] == 'wiki_page':
+            #     data['data']['timestamp'] = data['timestamp']
+            #     ret = dispatch(data['data'])
+            #     print("line:{}, ret:{}".format(line_num, ret))
+            #
+            #     # 模拟不同时间修改，wiki的创建与修改时间没法通过事件和api读取
+            #     time.sleep(1)
+            # elif data['data']['object_kind'] == 'issue':
+            #     ret = dispatch(data['data'])
+            #     print("line:{}, ret:{}".format(line_num, ret))
+            # elif data['data']['object_kind'] == 'push':
+            if data['data']['object_kind'] == 'push':
                 ret = dispatch(data['data'])
                 print("line:{}, ret:{}".format(line_num, ret))
 
