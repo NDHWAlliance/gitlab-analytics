@@ -2,7 +2,6 @@ import datetime
 import gitlab
 
 from flask import current_app as app
-from . import dbservice
 
 _gl = None
 
@@ -21,6 +20,10 @@ def is_hooked(project):
         if hook.url == web_hook:
             return True
     return False
+
+
+def get_project(project_id):
+    return _get_gl().projects.get(project_id)
 
 
 def get_projects():
@@ -74,3 +77,33 @@ def get_datetime(origin_str):
 
 def get_commit_detail(project_id, commit_id):
     return _get_gl().projects.get(project_id).commits.get(commit_id)
+
+
+def get_commit_list(project_id, str_time):
+    dt = get_datetime(str_time)
+    dt_7day = dt + datetime.timedelta(days=7) - datetime.timedelta(seconds=1)
+    dt_7day = dt_7day if dt_7day < datetime.datetime.now() else datetime.datetime.now()
+
+    now = datetime.datetime.now()
+    while dt_7day < now:
+        commits = _get_gl().projects.get(project_id).commits.list(since=dt.strftime('%Y-%m-%dT%H:%M:%SZ'), until=dt_7day.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        dt = dt_7day + datetime.timedelta(seconds=1)
+        dt_7day = dt_7day + datetime.timedelta(days=7)
+        dt_7day = dt_7day if dt_7day < now else now
+        for commit in commits:
+            yield get_commit_detail(project_id, commit.id)
+
+
+def get_issue_list(project_id):
+    return _get_gl().projects.get(project_id).issues.list()
+
+
+def get_mergerequest_list(project_id, page_no):
+    return _get_gl().projects.get(project_id).mergerequests.list(page=page_no, order_by='created_at', sort='asc')
+
+
+def get_wiki_list(project_id):
+    project = _get_gl().projects.get(project_id)
+    for wiki_data in project.wikis.list():
+        yield project.wikis.get(wiki_data.slug)
+

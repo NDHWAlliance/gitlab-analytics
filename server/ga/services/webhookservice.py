@@ -4,10 +4,6 @@
     webhook_handler.py
 """
 import datetime
-import sys
-
-from gitlab import GitlabGetError
-
 from ..models.gitlab_analytics_models import *
 from . import gitlabservice as gitlab_api
 
