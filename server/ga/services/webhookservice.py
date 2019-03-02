@@ -44,12 +44,19 @@ def push(push_data):
         # merge的和提交超过2000行的忽略
         # 仓库的第一个commit，parent_ids = 0
         # merge 操作, parent_ids = 2
-        l = len(commit_detail.parent_ids)
-        parent_id = ''
-        if l > 1:
-            continue
-        elif l == 1:
-            parent_id = commit_detail.parent_ids[0]
+
+        # l = len(commit_detail.parent_ids)
+        # parent_id = ''
+        # if l > 1:
+        #     continue
+        # elif l == 1:
+        #     parent_id = commit_detail.parent_ids[0]
+
+        parent_ids = len(commit_detail.parent_ids)
+        if parent_ids > 1:
+            ignore = 1
+        else:
+            ignore = 0
 
         GitlabCommits().insert(project=push_data['project']['id'],
                                project_path=push_data['project']['path_with_namespace'],
@@ -63,11 +70,11 @@ def push(push_data):
                                committed_date=gitlab_api.get_datetime(commit_detail.committed_date),
                                committer_email=commit_detail.committer_email,
                                committer_name=commit_detail.committer_name,
-                               ignore=0,
+                               ignore=ignore,
                                line_additions=commit_detail.stats['additions'],
                                line_deletions=commit_detail.stats['deletions'],
                                line_total=commit_detail.stats['total'],
-                               parent_id=parent_id,
+                               parent_ids=parent_ids,
                                ).on_conflict_replace().execute()
 
 

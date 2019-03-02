@@ -3,6 +3,7 @@ from flask import Flask
 
 from . import routes
 from .services import loginservice
+from . import commands
 
 
 def create_app():
@@ -17,4 +18,5 @@ def create_app():
                                              'gitlab_analytics')
     app.register_blueprint(routes.bp, url_prefix='/')
     loginservice.init_app(app, {'ga': '/signin'})
+    commands.init_commands(app)
     return app

@@ -32,7 +32,13 @@ class GitlabCommits(BaseModel):
     line_deletions = IntegerField(null=True)
     line_total = IntegerField(null=True)
     message = CharField()
-    parent_id = CharField()
+    # 2019-03-02 15:35:28 对于 merge 操作，有两个 parent_id， 所以这里只记录数量，不记录具体的值了
+    # alter table gitlab_commits add parent_ids int NOT NULL DEFAULT 0;
+    # alter table gitlab_commits drop parent_id;
+
+    # parent_id = CharField()
+    parent_ids = IntegerField()
+
     project = IntegerField(column_name='project_id')
     project_path = CharField()
     title = CharField()

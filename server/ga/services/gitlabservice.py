@@ -1,4 +1,5 @@
 import datetime
+from datetime import datetime as dt
 import gitlab
 
 from flask import current_app as app
@@ -26,24 +27,40 @@ def get_project(project_id):
     return _get_gl().projects.get(project_id)
 
 
-def get_projects():
+def gitlab_time_str_to_local_time(gitlab_timestr):
+    if gitlab_timestr[-6:] == '+08:00':
+        return dt.strptime(gitlab_timestr[:19], '%Y-%m-%dT%H:%M:%S')
+    if gitlab_timestr[-1:] == 'Z':
+        t = dt.strptime(gitlab_timestr[:19], '%Y-%m-%dT%H:%M:%S')
+        t2 = t + datetime.timedelta(hours=8)
+        return t2
+    raise Exception("invalid gitlab time string: {}".format(gitlab_timestr))
+
+
+def local_time_to_gitlab_time_str(t):
+    utc = datetime.timezone(datetime.timedelta())
+    return t.astimezone(utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def get_projects(since_date=None):
     gitlab_projects = _get_gl().projects.list(order_by='last_activity_at',
                                               as_list=False, limit=10)
-    projects = []
+
     for project in gitlab_projects:
+        last_activity_at = gitlab_time_str_to_local_time(project.last_activity_at)
+        if since_date is not None and last_activity_at < since_date:
+            break
         if is_hooked(project):
             hooked = 1
         else:
             hooked = 0
 
-        projects.append({
+        yield {
             "id": project.id,
             "url": project.web_url,
             "hooked": hooked,
             "loading": 0
-
-        })
-    return projects
+        }
 
 
 def add_hook(project_id):
@@ -86,7 +103,8 @@ def get_commit_list(project_id, str_time):
 
     now = datetime.datetime.now()
     while dt_7day < now:
-        commits = _get_gl().projects.get(project_id).commits.list(since=dt.strftime('%Y-%m-%dT%H:%M:%SZ'), until=dt_7day.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        commits = _get_gl().projects.get(project_id).commits.list(since=dt.strftime('%Y-%m-%dT%H:%M:%SZ'),
+                                                                  until=dt_7day.strftime('%Y-%m-%dT%H:%M:%SZ'))
         dt = dt_7day + datetime.timedelta(seconds=1)
         dt_7day = dt_7day + datetime.timedelta(days=7)
         dt_7day = dt_7day if dt_7day < now else now
@@ -107,3 +125,22 @@ def get_wiki_list(project_id):
     for wiki_data in project.wikis.list():
         yield project.wikis.get(wiki_data.slug)
 
+
+def get_active_projects(since_date=None):
+    gitlab_projects = _get_gl().projects.list(order_by='last_activity_at',
+                                              as_list=False, limit=10)
+
+    for project in gitlab_projects:
+        last_activity_at = gitlab_time_str_to_local_time(project.last_activity_at)
+        if since_date is not None and last_activity_at < since_date:
+            break
+        yield project
+
+
+def get_project_by_name(project_name):
+    project = _get_gl().projects.get(project_name)
+    return project
+
+
+def print_project(project):
+    print("id: {}, path: {}".format(project.id, project.path_with_namespace))
