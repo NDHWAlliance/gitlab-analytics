@@ -141,6 +141,10 @@ class ProjectService:
                 self.log_commit(commit)
 
     def import_commits(self):
+        logger = logging.getLogger("ga")
+        if 'default_branch' not in self.project.attributes:
+            logger.info("skip import project {} since it does not have repo branch".format(self.project.path_with_namespace))
+            return
         for commit in self.project.commits.list(as_list=False, limit=10):
             self.log_commit(commit)
 

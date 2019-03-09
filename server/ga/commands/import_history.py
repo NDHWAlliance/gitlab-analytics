@@ -1,4 +1,6 @@
 import datetime
+import json
+import os
 from datetime import datetime as dt
 import logging
 import click
@@ -60,6 +62,22 @@ def update_history(**options):
         ps.update_commits(since_date)
 
 
+def is_imported(project_name):
+    if not os.path.exists('imported.json'):
+        return False
+    d = json.load(open('imported.json', 'r'))
+    return project_name in d
+
+
+def set_imported(project_name):
+    if os.path.exists('imported.json'):
+        d = json.load(open('imported.json', 'r'))
+    else:
+        d = {}
+    d[project_name] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    json.dump(d, open('imported.json', 'w'), indent=4)
+
+
 @click.command('import')
 @click.option('--project', default=None, help='project')
 @click.option('--no-skip', is_flag=True, default=False)
@@ -79,5 +97,11 @@ def import_history(**options):
     else:
         projects = [gitlabservice.get_project_by_name(project_name)]
     for p in projects:
+        if is_imported(p.path_with_namespace):
+            logger.info("project {} had been imported already".format(p.path_with_namespace))
+            continue
+        logger.info("start import project: {}".format(p.path_with_namespace))
         ps = ProjectService(p, options['no_skip'])
         ps.import_commits()
+        logger.info("finish import project : {}".format(p.path_with_namespace))
+        set_imported(p.path_with_namespace)
