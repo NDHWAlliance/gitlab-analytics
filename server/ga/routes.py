@@ -115,7 +115,7 @@ def settings():
 @login_required
 def hooks():
     projects = gitlabservice.get_projects()
-    return render_template('admin/hooks.html', projects=projects)
+    return render_template('admin/hooks.html', projects=list(projects))
 
 
 @bp.route('/add_hook_to_project', methods=['POST'])
