@@ -2,6 +2,7 @@ import os
 from flask import Flask
 
 from . import routes
+from . import api_routes
 from .services import loginservice
 from . import commands
 
@@ -17,6 +18,7 @@ def create_app():
     app.config['mysql_database'] = os.getenv('MYSQL_DATABASE',
                                              'gitlab_analytics')
     app.register_blueprint(routes.bp, url_prefix='/')
+    app.register_blueprint(api_routes.bp, url_prefix='/api')
     loginservice.init_app(app, {'ga': '/signin'})
     commands.init_commands(app)
     return app

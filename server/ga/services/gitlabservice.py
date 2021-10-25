@@ -63,6 +63,16 @@ def get_projects(since_date=None):
         }
 
 
+def get_projects_with_pagination(page=1, per_page=10):
+    gitlab_projects = _get_gl().projects.list(per_page=per_page, page=page)
+    return [{"id": x.id, "url": x.web_url, "hooked": False} for x in gitlab_projects]
+
+
+def get_projects_total_num():
+    gitlab_projects = _get_gl().projects.list(as_list=False)
+    return gitlab_projects.total
+
+
 def add_hook(project_id):
     project = _get_gl().projects.get(project_id)
     project.hooks.create({'url': app.config['external_url'],

@@ -15,7 +15,7 @@ from .services import gitlabservice
 from .services import systemhookservice
 from .services import webhookservice
 
-bp = Blueprint('ga', __name__, template_folder="templates",
+bp = Blueprint('ga_page', __name__, template_folder="templates",
                static_folder='static')
 
 
@@ -114,7 +114,7 @@ def settings():
 @bp.route('/hooks', methods=['GET'])
 @login_required
 def hooks():
-    projects = gitlabservice.get_projects()
+    projects = []
     return render_template('admin/hooks.html', projects=list(projects))
 
 
