@@ -18,7 +18,7 @@ def create_app():
     app.config['mysql_database'] = os.getenv('MYSQL_DATABASE',
                                              'gitlab_analytics')
     app.register_blueprint(routes.bp, url_prefix='/')
+    loginservice.init_app(app, {'ga_page': '/signin'})
     app.register_blueprint(api_routes.bp, url_prefix='/api')
-    loginservice.init_app(app, {'ga': '/signin'})
     commands.init_commands(app)
     return app
