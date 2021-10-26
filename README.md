@@ -50,14 +50,14 @@ docker-compose up mysql grafana ga
 
 ### Configuration
 
-* Step 1: Access `http://gitlab-analytics.example.com:5000` .
+* Step 1: Access `http://gitlab-analytics.example.com:8080` .
   * Set a password to access the setting page.
   * In the setting page
-    * Default webhook(External Url) is the '$base_url/web_hook/' like `http://gitlab-analytics.example.com:5000/web_hook/`.
+    * Default webhook(External Url) is the '$base_url/web_hook/' like `http://gitlab-analytics.example.com:8080/web_hook/`.
     * set gitlab server URL and access token, the access token should have complete read/write access to gitlab API.
     * If your gitlab's version is higher than 10.6, remember to check the option ["Allow requests to the local network from hooks and services"](https://docs.gitlab.com/ee/security/webhooks.html) in the "Outbound requests" section inside the Admin area under Settings. 
 * Step 2: In the hooks page, choose the projects that you would like to add the webhook.
-* Step 3: If you would like to bind the webhook to your new project automatically, just configure the system hook '$base_url/system_hook' to your gitlab， like: `http://gitlab-analytics.example.com:5000/system_hook/`.
+* Step 3: If you would like to bind the webhook to your new project automatically, just configure the system hook '$base_url/system_hook' to your gitlab， like: `http://gitlab-analytics.example.com:8080/system_hook/`.
 
 ### analytics page
 
