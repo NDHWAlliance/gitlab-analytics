@@ -1,7 +1,7 @@
 import datetime
 from datetime import datetime as dt
 import gitlab
-
+from gitlab.exceptions import GitlabOperationError
 from flask import current_app as app
 
 _gl = None
@@ -65,7 +65,7 @@ def get_projects(since_date=None):
 
 def get_projects_with_pagination(page=1, per_page=10):
     gitlab_projects = _get_gl().projects.list(per_page=per_page, page=page)
-    return [{"id": x.id, "url": x.web_url, "hooked": False} for x in gitlab_projects]
+    return [{"id": x.id, "url": x.web_url, "hooked": is_hooked(x)} for x in gitlab_projects]
 
 
 def get_projects_total_num():
@@ -75,12 +75,16 @@ def get_projects_total_num():
 
 def add_hook(project_id):
     project = _get_gl().projects.get(project_id)
-    project.hooks.create({'url': app.config['external_url'],
-                          'push_events': True, 'issues_events': True,
-                          'merge_requests_events': True,
-                          'tag_push_events': True, 'note_events': True,
-                          'job_events': True, 'pipeline_events': True,
-                          'wiki_page_events': True})
+    try:
+        project.hooks.create({'url': app.config['external_url'],
+                              'push_events': True, 'issues_events': True,
+                              'merge_requests_events': True,
+                              'tag_push_events': True, 'note_events': True,
+                              'job_events': True, 'pipeline_events': True,
+                              'wiki_page_events': True})
+        return True, ""
+    except GitlabOperationError as err:
+        return False, str(err)
 
 
 def remove_hook(project_id):
@@ -93,7 +97,11 @@ def remove_hook(project_id):
             hook_id = hook.id
             break
     if hook_id is not None:
-        project.hooks.delete(hook_id)
+        try:
+            project.hooks.delete(hook_id)
+        except GitlabOperationError as err:
+            return False, str(err)
+    return True, ""
 
 
 def get_datetime(origin_str):

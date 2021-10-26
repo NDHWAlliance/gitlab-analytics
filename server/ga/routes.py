@@ -14,6 +14,7 @@ from .services import adminservice
 from .services import gitlabservice
 from .services import systemhookservice
 from .services import webhookservice
+from .models.response_status import ResponseStatus
 
 bp = Blueprint('ga_page', __name__, template_folder="templates",
                static_folder='static')
@@ -122,18 +123,23 @@ def hooks():
 def add_hook_to_project():
     data = request.get_json()
     project_id = data['id']
-    gitlabservice.add_hook(project_id)
-    # fixme need better response
-    return ""
+
+    success, message = gitlabservice.add_hook(project_id)
+    if success:
+        return jsonify(code=ResponseStatus.OK.code)
+    else:
+        return jsonify(code=ResponseStatus.ERROR.code, message=message)
 
 
 @bp.route('/remove_hook_from_project', methods=['POST'])
 def remove_hook_from_project():
     data = request.get_json()
     project_id = data['id']
-    gitlabservice.remove_hook(project_id)
-    # fixme need better response
-    return ""
+    success, message = gitlabservice.remove_hook(project_id)
+    if success:
+        return jsonify(code=ResponseStatus.OK.code)
+    else:
+        return jsonify(code=ResponseStatus.ERROR.code, message=message)
 
 
 @bp.route('/web_hook', methods=['POST'])

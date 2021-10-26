@@ -7,7 +7,7 @@
     <meta name="viewport"
           content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <link rel="icon" href="{{ url_for('.static', filename='favicon.ico') }}">
-
+    <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
     <!--
     从bootstrap-vue官方文档里，摘抄需要的css和js文件放入header， https://bootstrap-vue.org/docs#browser
 
@@ -73,15 +73,17 @@
 
                 <b-table
                         id="my-table"
+                        fixed="true"
                         :items="items"
                         :fields="fields"
                         :per-page="perPage"
                         :current-page="currentPage"
                 >
                     <template #cell(actions)="row">
-                        <b-button size="sm" @click="info(row.item, row.index, $event.target)" class="mr-1">
-                            Add webhook
-                        </b-button>
+                        <b-button size="sm" @click="toggle_hook(row.item, row.index, $event.target)"
+                                  v-bind:class="row.item.loading ? '': (row.item.hooked ? 'btn-success' : 'btn-danger')"
+                                  v-html="row.item.loading ? '<i class=\'fa fa-circle-o-notch fa-spin\'></i> loading...' : (row.item.hooked ? 'Remove webhook' : 'Add webhook')"
+                        ></b-button>
                     </template>
                 </b-table>
             </div>
@@ -91,6 +93,23 @@
 </div>
 </body>
 <script>
+    function toggle_webhook_request(project, callback){
+        const api_url = project.hooked? '/remove_hook_from_project':'/add_hook_to_project'
+        axios.post(api_url,{id:project.id}).then(function (response){
+            console.log(response);
+            if(response.data.code == 0){
+                project.hooked = !project.hooked
+                callback(true,"")
+            }else{
+                callback(false, response.data.message)
+            }
+
+        }).catch(function (error){
+            console.log(error);
+            callback(false, error)
+        })
+    }
+
     window.onload = () => {
         let vm = new Vue({
             el: '#app',
@@ -99,7 +118,7 @@
                     fields: [
                         {key: "id", label: "ID"},
                         {key: "url", label: "URL"},
-                        {key: "hooked", label: "是否已注册Webhook"},
+                        //{key: "hooked", label: "是否已注册Webhook"},
                         {key: "actions", label: "Actions"}
                     ],
                     perPage: 10,
@@ -111,9 +130,13 @@
                         const url_with_params = './api/projects/list' + params
                         const promise = axios.get(url_with_params)
                         return promise.then(data => {
-                            const items = data.data.items
+                            let projects = data.data.items
+                            // add loading property for each item
+                            projects.forEach((project) => {
+                                project.loading = false
+                            })
                             vm.totalItems = data.data.totalItems
-                            return items || []
+                            return projects || []
                         })
                     }
                 }
@@ -121,6 +144,21 @@
             computed: {
                 rows() {
                     return this.totalItems
+                }
+            },
+            methods: {
+                toggle_hook: function (project, index, event_target) {
+                    if (project.loading) {
+                        return;
+                    }
+                    project.loading = true
+                    toggle_webhook_request(project,function (success,error_message){
+                        if(success){
+                            project.loading = false
+                        }else{
+                            alert(error_message)
+                        }
+                    })
                 }
             }
         })
