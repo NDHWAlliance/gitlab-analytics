@@ -93,20 +93,20 @@
 </div>
 </body>
 <script>
-    function toggle_webhook_request(project, callback){
-        const api_url = project.hooked? '/remove_hook_from_project':'/add_hook_to_project'
-        axios.post(api_url,{id:project.id}).then(function (response){
+    function toggle_webhook_request(project, callback) {
+        const api_url = project.hooked ? './api/remove_hook_from_project' : './api/add_hook_to_project'
+        axios.post(api_url, {id: project.id}).then(function (response) {
             console.log(response);
-            if(response.data.code == 0){
+            if (response.data.status === 0) {
                 project.hooked = !project.hooked
-                callback(true,"")
-            }else{
-                callback(false, response.data.message)
+                callback(true, "")
+            } else {
+                callback(false, "API Error: " + response.data.message)
             }
 
-        }).catch(function (error){
+        }).catch(function (error) {
             console.log(error);
-            callback(false, error)
+            callback(false, "axios HTTP Request Error: " + error)
         })
     }
 
@@ -129,14 +129,22 @@
                         const params = '?page=' + ctx.currentPage + '&size=' + ctx.perPage
                         const url_with_params = './api/projects/list' + params
                         const promise = axios.get(url_with_params)
-                        return promise.then(data => {
-                            let projects = data.data.items
-                            // add loading property for each item
-                            projects.forEach((project) => {
-                                project.loading = false
-                            })
-                            vm.totalItems = data.data.totalItems
-                            return projects || []
+                        return promise.then(response => {
+                            if (response.data.status == 0) {
+                                let projects = response.data.items
+                                // add loading property for each item
+                                projects.forEach((project) => {
+                                    project.loading = false
+                                })
+                                vm.totalItems = response.data.totalItems
+                                return projects || []
+                            } else {
+                                alert("API Error: " + response.data.message);
+                                return []
+                            }
+                        }).catch(function (error) {
+                            alert("axios HTTP Request Error: " + error);
+                            return []
                         })
                     }
                 }
@@ -152,10 +160,10 @@
                         return;
                     }
                     project.loading = true
-                    toggle_webhook_request(project,function (success,error_message){
-                        if(success){
+                    toggle_webhook_request(project, function (success, error_message) {
+                        if (success) {
                             project.loading = false
-                        }else{
+                        } else {
                             alert(error_message)
                         }
                     })

@@ -23,7 +23,8 @@ bp = Blueprint('ga_page', __name__, template_folder="templates",
 @bp.before_request
 def load_settings_from_db():
     app.logger.info("load_settings_from_db " + request.endpoint)
-    if request.endpoint in ['ga.setup', 'ga.get_db_status']:
+
+    if request.endpoint in [bp.name + '.setup', bp.name + '.get_db_status']:
         return
     connected, message = dbservice.connect()
     if not connected:
@@ -119,27 +120,6 @@ def hooks():
     return render_template('admin/hooks.html', projects=list(projects))
 
 
-@bp.route('/add_hook_to_project', methods=['POST'])
-def add_hook_to_project():
-    data = request.get_json()
-    project_id = data['id']
-
-    success, message = gitlabservice.add_hook(project_id)
-    if success:
-        return jsonify(code=ResponseStatus.OK.code)
-    else:
-        return jsonify(code=ResponseStatus.ERROR.code, message=message)
-
-
-@bp.route('/remove_hook_from_project', methods=['POST'])
-def remove_hook_from_project():
-    data = request.get_json()
-    project_id = data['id']
-    success, message = gitlabservice.remove_hook(project_id)
-    if success:
-        return jsonify(code=ResponseStatus.OK.code)
-    else:
-        return jsonify(code=ResponseStatus.ERROR.code, message=message)
 
 
 @bp.route('/web_hook', methods=['POST'])
