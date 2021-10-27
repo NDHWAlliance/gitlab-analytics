@@ -85,7 +85,7 @@ def issue(issue_data):
 
     # 兼容assignee忘记指定的情况
     assignee = issue_data['user']['username']
-    if 'assignees' in issue_data.keys() and len(issue_data['assignees']) is 1:
+    if 'assignees' in issue_data.keys() and len(issue_data['assignees']) == 1:
         assignee = issue_data['assignees'][0]['username']
 
     GitlabIssues().insert(project=issue_data['project']['id'],

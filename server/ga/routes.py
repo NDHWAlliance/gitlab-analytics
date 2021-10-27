@@ -1,3 +1,6 @@
+import json
+import traceback
+
 import flask
 import flask_login
 from flask import Blueprint
@@ -128,10 +131,12 @@ def web_hook():
     try:
         ret = webhookservice.dispatch(request.get_json())
         return jsonify(ret)
-    except:
+    except Exception as err:
+        traceback.print_exc()
+        app.logger.error(repr(err))
         app.logger.error("Error Data: ")
-        app.logger.error(request.get_json())
-        return jsonify({'ret': -1, 'message': 'Error Input Data'})
+        app.logger.error(json.dumps(request.get_json()))
+        return jsonify({'ret': -1, 'message': 'failed to handle request.'})
 
 
 @bp.route('/system_hook', methods=['POST'])
@@ -140,7 +145,9 @@ def system_hook():
     try:
         ret = systemhookservice.dispatch(request.get_json())
         return jsonify(ret)
-    except:
+    except Exception as err:
+        traceback.print_exc()
+        app.logger.error(repr(err))
         app.logger.error("Error Data: ")
-        app.logger.error(request.get_json())
-        return jsonify({'ret': -1, 'message': 'Error Input Data'})
+        app.logger.error(json.dumps(request.get_json()))
+        return jsonify({'ret': -1, 'message': 'failed to handle request.'})
