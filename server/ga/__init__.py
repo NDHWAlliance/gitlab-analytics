@@ -1,4 +1,5 @@
 import os
+import logging
 from flask import Flask
 
 from . import routes
@@ -8,6 +9,11 @@ from . import commands
 
 
 def create_app():
+    logging.basicConfig(level=logging.DEBUG, datefmt='%Y-%m-%d:%H:%M:%S',
+                        format='%(asctime)s,%(msecs)d %(levelname)-8s [%(filename)s:%(lineno)d] %(message)s')
+
+    logging.getLogger("peewee").setLevel(logging.INFO)
+    logging.getLogger("requests").setLevel(logging.DEBUG)
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'this is a secret key'
     # all the env here are defined in docker-compose.yml

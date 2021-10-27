@@ -52,3 +52,6 @@ services:
 networks:
   ganet:
     driver: bridge
+    driver_opts:
+      # TODO This config is only useful in the internal network of my company.
+      com.docker.network.driver.mtu: 1450
