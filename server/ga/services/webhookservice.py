@@ -110,7 +110,8 @@ def wiki_page(wiki_data):
                                   project_path=wiki_data['project']['path_with_namespace'],
                                   author_name=wiki_data['user']['username'],
                                   wiki_id=wiki_data['object_attributes']['slug'],
-                                  created_at=datetime.datetime.fromtimestamp(wiki_data['timestamp']) if 'timestamp' in wiki_data else datetime.datetime.now(),
+                                  created_at=datetime.datetime.fromtimestamp(
+                                      wiki_data['timestamp']) if 'timestamp' in wiki_data else datetime.datetime.now(),
                                   ignore=0,
                                   title=wiki_data['object_attributes']['title'],
                                   content_length=len(wiki_data['object_attributes']['content'])
@@ -119,7 +120,8 @@ def wiki_page(wiki_data):
                                   project_path=wiki_data['project']['path_with_namespace'],
                                   author_name=wiki_data['user']['username'],
                                   wiki_id=wiki_data['object_attributes']['slug'],
-                                  created_at=datetime.datetime.fromtimestamp(wiki_data['timestamp']) if 'timestamp' in wiki_data else datetime.datetime.now(),
+                                  created_at=datetime.datetime.fromtimestamp(
+                                      wiki_data['timestamp']) if 'timestamp' in wiki_data else datetime.datetime.now(),
                                   ignore=0,
                                   title=wiki_data['object_attributes']['title'],
                                   content_length=len(wiki_data['object_attributes']['content'])
@@ -128,7 +130,8 @@ def wiki_page(wiki_data):
 
     # 更新的时候比对字数
     if wiki_data['object_attributes']['action'] == 'update':
-        create_wiki = GitlabWikiCreate.get_or_none(project=wiki_data['project']['id'], wiki_id=wiki_data['object_attributes']['slug'])
+        create_wiki = GitlabWikiCreate.get_or_none(project=wiki_data['project']['id'],
+                                                   wiki_id=wiki_data['object_attributes']['slug'])
         if create_wiki:
             content_additions = len(wiki_data['object_attributes']['content']) - create_wiki.content_length
             if content_additions > 0:
@@ -137,18 +140,20 @@ def wiki_page(wiki_data):
                                           project_path=wiki_data['project']['path_with_namespace'],
                                           author_name=wiki_data['user']['username'],
                                           wiki_id=wiki_data['object_attributes']['slug'],
-                                          created_at=datetime.datetime.fromtimestamp(wiki_data['timestamp']) if 'timestamp' in wiki_data else datetime.datetime.now(),
+                                          created_at=datetime.datetime.fromtimestamp(wiki_data[
+                                                                                         'timestamp']) if 'timestamp' in wiki_data else datetime.datetime.now(),
                                           ignore=0,
                                           title=wiki_data['object_attributes']['title'],
                                           content_length=content_additions,
                                           ).on_conflict_replace().execute()
                 GitlabWikiCreate.update(content_length=len(wiki_data['object_attributes']['content'])).where(
-                    GitlabWikiCreate.project == wiki_data['project']['id'], GitlabWikiCreate.wiki_id == wiki_data['object_attributes']['slug']).execute()
+                    GitlabWikiCreate.project == wiki_data['project']['id'],
+                    GitlabWikiCreate.wiki_id == wiki_data['object_attributes']['slug']).execute()
 
 
 def merge_request(merge_request_data):
     # open的时候才统计
-    if merge_request_data['object_attributes']['action'] != 'open':
+    if merge_request_data.get('object_attributes', {}).get('state', '') != 'opened':
         return
 
     # 不指定assignee的merge_request不统计，不是规范的codereview
@@ -156,7 +161,7 @@ def merge_request(merge_request_data):
         return
 
     # print('{} {}'.format(merge_request_data['user']['username'], merge_request_data['assignee']['username']))
-
+    assignee = merge_request_data['assignees'][0]['username']
     GitlabMergeRequest.insert(project=merge_request_data['project']['id'],
                               project_path=merge_request_data['project']['path_with_namespace'],
                               author_name=merge_request_data['user']['username'],
@@ -165,14 +170,16 @@ def merge_request(merge_request_data):
                               ignore=0,
                               title=merge_request_data['object_attributes']['title'],
                               milestone_id=merge_request_data['object_attributes']['milestone_id'],
-                              assignee=merge_request_data['assignee']['username']
+                              assignee=assignee
                               ).on_conflict_replace().execute()
+
     GitlabMRInitiatorComment.insert(project=merge_request_data['project']['id'],
                                     project_path=merge_request_data['project']['path_with_namespace'],
                                     author_name=merge_request_data['user']['username'],
                                     comment_id=0,
                                     merge_request_id=merge_request_data['object_attributes']['id'],
-                                    created_at=gitlab_api.get_datetime(merge_request_data['object_attributes']['created_at']),
+                                    created_at=gitlab_api.get_datetime(
+                                        merge_request_data['object_attributes']['created_at']),
                                     ignore=0,
                                     content_length=len(merge_request_data['object_attributes']['description'])
                                     ).on_conflict_replace().execute()
@@ -187,7 +194,8 @@ def note(comment_data):
                                             author_name=comment_data['user']['username'],
                                             comment_id=comment_data['object_attributes']['id'],
                                             merge_request_id=comment_data['merge_request']['id'],
-                                            created_at=gitlab_api.get_datetime(comment_data['object_attributes']['created_at']),
+                                            created_at=gitlab_api.get_datetime(
+                                                comment_data['object_attributes']['created_at']),
                                             ignore=0,
                                             content_length=len(comment_data['object_attributes']['note'])
                                             ).on_conflict_replace().execute()
@@ -198,7 +206,8 @@ def note(comment_data):
                                            author_name=comment_data['user']['username'],
                                            comment_id=comment_data['object_attributes']['id'],
                                            merge_request_id=comment_data['merge_request']['id'],
-                                           created_at=gitlab_api.get_datetime(comment_data['object_attributes']['created_at']),
+                                           created_at=gitlab_api.get_datetime(
+                                               comment_data['object_attributes']['created_at']),
                                            ignore=0,
                                            content_length=len(comment_data['object_attributes']['note'])
                                            ).on_conflict_replace().execute()
