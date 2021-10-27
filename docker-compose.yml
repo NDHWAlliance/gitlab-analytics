@@ -36,6 +36,18 @@ services:
       - MYSQL_PASSWORD=4t9wegcvbYSd
     networks:
       - ganet
+  mongo:
+    image: mongo:4.4-focal
+    container_name: gamongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./data/mongodb:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=ga
+      - MONGO_INITDB_ROOT_PASSWORD=4t9wegcvbYSd
+    networks:
+      - ganet
   grafana:
     image: grafana/grafana:5.1.4
     container_name: grafana
@@ -52,6 +64,3 @@ services:
 networks:
   ganet:
     driver: bridge
-    driver_opts:
-      # TODO This config is only useful in the internal network of my company.
-      com.docker.network.driver.mtu: 1450
