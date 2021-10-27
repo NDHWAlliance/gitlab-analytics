@@ -12,7 +12,7 @@ def _get_gl():
         return _gl
     url = app.config['gitlab_url']
     private_token = app.config['private_token']
-    return gitlab.Gitlab(url, private_token=private_token)
+    return gitlab.Gitlab(url, private_token=private_token, timeout=(5, 30))
 
 
 def is_hooked(project):
