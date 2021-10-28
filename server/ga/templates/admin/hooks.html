@@ -83,7 +83,6 @@
 
                 <b-table
                         id="my-table"
-                        fixed="true"
                         small="true"
                         :items="items"
                         :fields="fields"
@@ -93,7 +92,7 @@
                     <template #cell(actions)="row">
                         <b-button size="sm" @click="toggle_hook(row.item, row.index, $event.target)"
                                   v-bind:class="row.item.loading ? '': (row.item.hooked ? 'btn-success' : 'btn-danger')"
-                                  v-html="row.item.loading ? '<i class=\'fa fa-circle-o-notch fa-spin\'></i> loading...' : (row.item.hooked ? 'Remove webhook' : 'Add webhook')"
+                                  v-html="row.item.loading ? '<i class=\'fa fa-circle-o-notch fa-spin\'></i>' : (row.item.hooked ? 'unhook' : 'hook')"
                         ></b-button>
                     </template>
                 </b-table>
@@ -127,10 +126,10 @@
             data() {
                 return {
                     fields: [
-                        {key: "id", label: "ID"},
-                        {key: "url", label: "URL"},
+                        //{key: "id", label: "ID"},
+                        {key: "actions", label: "Actions", thStyle: "width:100px"},
                         //{key: "hooked", label: "是否已注册Webhook"},
-                        {key: "actions", label: "Actions"}
+                        {key: "url", label: "URL"}
                     ],
                     perPage: 10,
                     filter: "",
