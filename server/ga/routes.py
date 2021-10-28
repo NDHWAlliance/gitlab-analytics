@@ -15,6 +15,7 @@ from flask_login import current_user
 from .services import dbservice
 from .services import adminservice
 from .services import gitlabservice
+from .services import mongoservice
 from .services import systemhookservice
 from .services import webhookservice
 from .models.response_status import ResponseStatus
@@ -123,31 +124,30 @@ def hooks():
     return render_template('admin/hooks.html', projects=list(projects))
 
 
+def event_handler(event_type, event_data, handler):
+    event_error = None
+    try:
+        ret = handler(event_data)
+    except Exception as err:
+        traceback.print_exc()
+        event_error = repr(err)
+        app.logger.error(repr(err))
+        app.logger.error("Error Data: ")
+        app.logger.error(json.dumps(request.get_json()))
+        ret = {'ret': -1, 'message': 'failed to handle request.'}
+    finally:
+        if app.config['mongo_available']:
+            mongoservice.save_event(event_type, event_data, event_error)
+        return jsonify(ret)
 
 
 @bp.route('/web_hook', methods=['POST'])
 @bp.route('/web_hook/', methods=['POST'])
 def web_hook():
-    try:
-        ret = webhookservice.dispatch(request.get_json())
-        return jsonify(ret)
-    except Exception as err:
-        traceback.print_exc()
-        app.logger.error(repr(err))
-        app.logger.error("Error Data: ")
-        app.logger.error(json.dumps(request.get_json()))
-        return jsonify({'ret': -1, 'message': 'failed to handle request.'})
+    return event_handler('web_hook', request.get_json(), webhookservice.dispatch)
 
 
 @bp.route('/system_hook', methods=['POST'])
 @bp.route('/system_hook/', methods=['POST'])
 def system_hook():
-    try:
-        ret = systemhookservice.dispatch(request.get_json())
-        return jsonify(ret)
-    except Exception as err:
-        traceback.print_exc()
-        app.logger.error(repr(err))
-        app.logger.error("Error Data: ")
-        app.logger.error(json.dumps(request.get_json()))
-        return jsonify({'ret': -1, 'message': 'failed to handle request.'})
+    return event_handler('system_hook', request.get_json(), systemhookservice.dispatch)
