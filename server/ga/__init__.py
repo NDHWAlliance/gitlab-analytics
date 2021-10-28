@@ -17,6 +17,14 @@ def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'this is a secret key'
     # all the env here are defined in docker-compose.yml
+    app.config['mongo_host'] = os.getenv('MONGO_HOST', '127.0.0.1')
+    app.config['mongo_port'] = os.getenv('MONGO_PORT', 27017)
+    app.config['mongo_username'] = os.getenv('MONGO_USERNAME', 'ga')
+    app.config['mongo_password'] = os.getenv('MONGO_PASSWORD', '4t9wegcvbYSd')
+    app.config['mongo_database'] = os.getenv('MONGO_DATABASE', 'gitlab_analytics')
+    # default is False
+    app.config['mongo_available'] = os.getenv('MONGO_AVAILABLE', "FALSE") == "TRUE"
+
     app.config['mysql_host'] = os.getenv('MYSQL_HOST', '127.0.0.1')
     app.config['mysql_port'] = os.getenv('MYSQL_PORT', 3306)
     app.config['mysql_user'] = os.getenv('MYSQL_USER', 'ga')
