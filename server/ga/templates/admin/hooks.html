@@ -60,12 +60,22 @@
     <div>
         <template>
             <div class="overflow-auto">
+                <b-form-group align="center" class="mb-2">
+                    <b-input-group>
+                        <b-form-input id="filter-input" v-model="filter" type="search" debounce="500"
+                                      placeholder="Type to Search"
+                        ></b-form-input>
+
+                        <b-input-group-append>
+                            <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
+                        </b-input-group-append>
+                    </b-input-group>
+                </b-form-group>
                 <b-pagination
                         v-model="currentPage"
                         :total-rows="rows"
                         :per-page="perPage"
                         aria-controls="my-table"
-                        size="lg"
                         align="center"
                 ></b-pagination>
 
@@ -74,6 +84,7 @@
                 <b-table
                         id="my-table"
                         fixed="true"
+                        small="true"
                         :items="items"
                         :fields="fields"
                         :per-page="perPage"
@@ -122,11 +133,11 @@
                         {key: "actions", label: "Actions"}
                     ],
                     perPage: 10,
+                    filter: "",
                     currentPage: 1,
                     totalItems: 0,
                     items: function (ctx) {
-                        let self = this
-                        const params = '?page=' + ctx.currentPage + '&size=' + ctx.perPage
+                        const params = '?page=' + ctx.currentPage + '&size=' + ctx.perPage + '&search=' + vm.filter
                         const url_with_params = './api/projects/list' + params
                         const promise = axios.get(url_with_params)
                         return promise.then(response => {
@@ -167,6 +178,12 @@
                             alert(error_message)
                         }
                     })
+                }
+            },
+            watch: {
+                filter: function (value, oldValue) {
+                    console.log(value)
+                    this.$root.$emit('bv::refresh::table', 'my-table')
                 }
             }
         })

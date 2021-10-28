@@ -63,13 +63,13 @@ def get_projects(since_date=None):
         }
 
 
-def get_projects_with_pagination(page=1, per_page=10):
-    gitlab_projects = _get_gl().projects.list(per_page=per_page, page=page)
+def get_projects_with_pagination(page=1, per_page=10, search=None):
+    gitlab_projects = _get_gl().projects.list(per_page=per_page, page=page, search=search, search_namespaces=True)
     return [{"id": x.id, "url": x.web_url, "hooked": is_hooked(x)} for x in gitlab_projects]
 
 
-def get_projects_total_num():
-    gitlab_projects = _get_gl().projects.list(as_list=False)
+def get_projects_total_num(search=None):
+    gitlab_projects = _get_gl().projects.list(as_list=False, search=search, search_namespaces=True)
     return gitlab_projects.total
 
 

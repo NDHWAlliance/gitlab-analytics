@@ -36,12 +36,13 @@ def projects_list():
     app.logger.info(app.config)
     page = request.args.get('page')
     size = request.args.get('size')
+    search = request.args.get('search')
     status = ResponseStatus.OK.code
     try:
         data = {
             "status": status,
-            "items": gitlabservice.get_projects_with_pagination(page=page, per_page=size),
-            "totalItems": gitlabservice.get_projects_total_num()}
+            "items": gitlabservice.get_projects_with_pagination(page=page, per_page=size, search=search),
+            "totalItems": gitlabservice.get_projects_total_num(search=search)}
         return jsonify(data)
     except GitlabError as ex:
         if ex.response_code == 401:
