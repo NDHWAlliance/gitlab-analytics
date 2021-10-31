@@ -7,5 +7,6 @@ providers:
   type: file
   disableDeletion: false
   updateIntervalSeconds: 3 #how often Grafana will scan for changed dashboards
+  allowUiUpdates: true
   options:
     path: /etc/grafana/dashboards
